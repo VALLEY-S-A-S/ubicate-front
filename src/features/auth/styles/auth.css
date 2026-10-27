@@ -1,0 +1,260 @@
+/**
+ * Estilos del inicio de sesión.
+ * Autor: Lady Johana Vidal Sevillano
+ *
+ * Replica la tarjeta oscura, los campos blancos con iconos y la nota del
+ * prototipo, con ajustes para pantallas pequeñas.
+ */
+
+.login-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  background: var(--color-bg);
+}
+
+.login-page__content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.login-brand__logo {
+  display: block;
+  width: 78px;
+  height: 78px;
+  border-radius: 19px;
+  box-shadow: 0 12px 24px -10px rgba(140, 20, 23, 0.55);
+}
+
+.login-brand__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-brand-strong);
+}
+
+.login-card {
+  width: 100%;
+  padding: 26px 26px 22px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, #9d181b 0%, #851215 55%, #741013 100%);
+  box-shadow: var(--shadow-card);
+  color: #fff;
+}
+
+.login-card__title {
+  margin: 0;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.login-card__subtitle {
+  margin: 5px 0 20px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.login-field__control {
+  position: relative;
+}
+
+.login-field__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px 0 14px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13.5px;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.login-field__input::placeholder {
+  color: #a3a3a3;
+}
+
+.login-field__input:focus {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
+}
+
+.login-field__input[aria-invalid='true'] {
+  border-color: #ffb4b4;
+}
+
+.login-field__input:disabled {
+  opacity: 0.75;
+}
+
+.login-field__icon {
+  position: absolute;
+  top: 50%;
+  right: 11px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #b9b9b9;
+  transform: translateY(-50%);
+}
+
+button.login-field__icon {
+  cursor: pointer;
+}
+
+button.login-field__icon:hover {
+  color: var(--color-brand-strong);
+}
+
+button.login-field__icon:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: -2px;
+}
+
+.login-field__error {
+  margin: 0;
+  padding-left: 2px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: #ffd9d9;
+}
+
+.login-form__error {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ffe1e1;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.login-form__submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-brand-strong);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.12s ease;
+}
+
+.login-form__submit:hover:not(:disabled) {
+  background: #f7eaea;
+}
+
+.login-form__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.login-form__submit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.login-form__submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-form__spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(142, 20, 23, 0.25);
+  border-top-color: var(--color-brand-strong);
+  border-radius: 50%;
+  animation: login-spin 0.7s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-card__note {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.login-card__note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.login-card__domain {
+  display: block;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 28px 16px;
+  }
+
+  .login-brand__logo {
+    width: 68px;
+    height: 68px;
+    border-radius: 17px;
+  }
+
+  .login-brand__name {
+    font-size: 27px;
+  }
+
+  .login-card {
+    padding: 22px 20px 20px;
+  }
+}
