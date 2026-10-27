@@ -57,10 +57,7 @@ function LoginPage({ onSuccess }) {
 
           <p className="login-card__note">
             <InfoIcon />
-            <span>
-              Solo se permiten cuentas institucionales
-              
-            </span>
+            <span>Solo se permiten cuentas institucionales</span>
           </p>
         </section>
       </div>

@@ -7,8 +7,11 @@
  */
 
 import { useState } from 'react'
+import { ALLOWED_EMAIL_DOMAINS } from '../constants'
 import { isAdminRole, login } from '../services/authApi'
 import { saveSession } from '../services/session'
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const INITIAL_VALUES = {
   correoInstitucional: '',
@@ -95,8 +98,15 @@ function LoginForm({ onSuccess }) {
 
     if (!email) {
       errors.correoInstitucional = 'Ingresa tu correo institucional.'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!EMAIL_PATTERN.test(email)) {
       errors.correoInstitucional = 'Ingresa un correo válido.'
+    } else {
+      const domain = email.slice(email.lastIndexOf('@') + 1).toLowerCase()
+
+      if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+        errors.correoInstitucional =
+          'Solo se permiten correos institucionales.'
+      }
     }
 
     if (!values.contrasenia) {

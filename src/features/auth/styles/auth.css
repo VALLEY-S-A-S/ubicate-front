@@ -234,11 +234,6 @@ button.login-field__icon:focus-visible {
   margin-top: 1px;
 }
 
-.login-card__domain {
-  display: block;
-  color: #fff;
-}
-
 @media (max-width: 480px) {
   .login-page {
     padding: 28px 16px;
