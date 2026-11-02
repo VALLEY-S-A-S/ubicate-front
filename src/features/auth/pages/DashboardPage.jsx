@@ -9,8 +9,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import BloquesPage from '../../espacios/pages/BloquesPage'
+import EspaciosPage from '../../espacios/pages/EspaciosPage'
+import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 
-const DashboardPage = ({ onLogout, session }) => {
+const DashboardPage = ({ onLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const menuRef = useRef(null)
@@ -51,6 +54,10 @@ const DashboardPage = ({ onLogout, session }) => {
     onLogout?.()
   }
 
+  const isEspacios = route === '/dashboard/espacios'
+  const isBloques = route === '/dashboard/espacios/bloques'
+  const isGestionEspacios = route === '/dashboard/espacios/espacios'
+
   return (
     <main className="dashboard-page">
       <div className="dashboard-layout">
@@ -58,7 +65,10 @@ const DashboardPage = ({ onLogout, session }) => {
         <aside className="dashboard-sidebar">
           <h2 className="sidebar-header">Menú</h2>
           <nav className="sidebar-nav">
-            <a href="#/dashboard/espacios" className="sidebar-link">
+            <a
+              href="#/dashboard/espacios"
+              className={`sidebar-link${route?.startsWith('/dashboard/espacios') ? ' active' : ''}`}
+            >
               Administrar espacios
             </a>
           </nav>
@@ -69,7 +79,27 @@ const DashboardPage = ({ onLogout, session }) => {
           {/* Barra superior */}
           <header className="dashboard-header">
             <div className="breadcrumb">
-              Administración {'>'} Espacios
+              Administración
+              {isBloques ? (
+                <>
+                  {' > '}
+                  Administrar espacios
+                  {' > '}
+                  <span>Gestionar bloques</span>
+                </>
+              ) : isGestionEspacios ? (
+                <>
+                  {' > '}
+                  Administrar espacios
+                  {' > '}
+                  <span>Gestionar espacios</span>
+                </>
+              ) : isEspacios ? (
+                <>
+                  {' > '}
+                  <span>Administrar espacios</span>
+                </>
+              ) : null}
             </div>
             <div className="header-actions">
               <div className="user-dropdown" ref={menuRef}>
@@ -111,10 +141,22 @@ const DashboardPage = ({ onLogout, session }) => {
 
           {/* Área de contenido */}
           <div className="dashboard-main">
-            <section className="module-section">
-              <h3>Bienvenido al dashboard</h3>
-              <p>Administra los espacios universitarios desde aquí.</p>
-            </section>
+            {isBloques ? (
+              <BloquesPage token={session?.token} onLogout={onLogout} />
+            ) : isGestionEspacios ? (
+              <GestionEspaciosPage
+                token={session?.token}
+                onLogout={onLogout}
+                sedeId={session?.user?.sedeId}
+              />
+            ) : isEspacios ? (
+              <EspaciosPage />
+            ) : (
+              <section className="module-section">
+                <h3>Bienvenido al dashboard</h3>
+                <p>Administra los espacios universitarios desde aquí.</p>
+              </section>
+            )}
           </div>
         </div>
       </div>
