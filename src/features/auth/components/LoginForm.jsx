@@ -157,6 +157,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
           correoInstitucional: data.correoInstitucional,
           nombre: data.nombre,
           rol: data.rol,
+          sedeId: data.sedeId,
         },
       })
 

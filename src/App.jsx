@@ -124,7 +124,7 @@ function App() {
   }
 
   if (isAdminRole(session.user?.rol)) {
-    return <DashboardPage onLogout={handleLogout} session={session} />
+    return <DashboardPage onLogout={handleLogout} session={session} route={route} />
   }
 
   clearSession()
