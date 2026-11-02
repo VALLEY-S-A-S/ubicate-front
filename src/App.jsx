@@ -6,12 +6,52 @@
  * panel. El placeholder es temporal hasta que se implemente el dashboard.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LoginPage from './features/auth/pages/LoginPage'
+import RegisterPage from './features/auth/pages/RegisterPage'
+import VerifyEmailPage from './features/auth/pages/VerifyEmailPage'
 import { isAdminRole } from './features/auth/services/authApi'
 import { clearSession, getSession } from './features/auth/services/session'
+import {
+  getPendingVerification,
+  savePendingVerification,
+} from './features/auth/services/verification.js'
+
+const ROUTES = new Set(['/login', '/registro', '/verificar-correo'])
+
+function getRoute() {
+  const route = window.location.hash.slice(1)
+  return ROUTES.has(route) ? route : '/login'
+}
 
 function App() {
+  const [route, setRoute] = useState(getRoute)
+  const [pending, setPending] = useState(getPendingVerification)
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setRoute(getRoute())
+      setPending(getPendingVerification())
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  useEffect(() => {
+    const titles = {
+      '/login': 'Iniciar sesión',
+      '/registro': 'Crear cuenta',
+      '/verificar-correo': 'Revisa tu correo',
+    }
+    document.title = `Ubícate | ${titles[route]}`
+    document.querySelector('main [tabindex="-1"]')?.focus()
+    window.scrollTo(0, 0)
+  }, [route])
+
+  const handleVerification = (email) => {
+    setPending(savePendingVerification(email))
+    window.location.hash = '/verificar-correo'
+  }
   // Solo se restaura la sesión si sigue perteneciendo a un administrador.
   const [session, setSession] = useState(() => {
     const storedSession = getSession()
@@ -30,7 +70,18 @@ function App() {
   }
 
   if (!session) {
-    return <LoginPage onSuccess={() => setSession(getSession())} />
+    if (route === '/registro')
+      return <RegisterPage onRegistered={handleVerification} />
+    if (route === '/verificar-correo')
+      return (
+        <VerifyEmailPage key={pending?.email ?? 'missing'} pending={pending} />
+      )
+    return (
+      <LoginPage
+        onSuccess={() => setSession(getSession())}
+        onVerificationRequired={handleVerification}
+      />
+    )
   }
 
   return (

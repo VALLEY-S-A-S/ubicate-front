@@ -19,5 +19,23 @@ export function login({ correoInstitucional, contrasenia }) {
 }
 
 export function isAdminRole(rol) {
-  return ADMIN_ROLES.has(String(rol ?? '').trim().toUpperCase())
+  return ADMIN_ROLES.has(
+    String(rol ?? '')
+      .trim()
+      .toUpperCase(),
+  )
+}
+
+export function register({ nombre, correoInstitucional, contrasenia }) {
+  return apiRequest('/api/auth/register', {
+    method: 'POST',
+    body: { nombre, correoInstitucional, contrasenia },
+  })
+}
+
+export function resendVerification(correoInstitucional) {
+  return apiRequest('/api/auth/resend-verification', {
+    method: 'POST',
+    body: { correoInstitucional },
+  })
 }

@@ -30,7 +30,7 @@ function InfoIcon() {
   )
 }
 
-function LoginPage({ onSuccess }) {
+function LoginPage({ onSuccess, onVerificationRequired }) {
   return (
     <main className="login-page">
       <div className="login-page__content">
@@ -46,14 +46,21 @@ function LoginPage({ onSuccess }) {
         </header>
 
         <section className="login-card" aria-labelledby="login-title">
-          <h2 id="login-title" className="login-card__title">
+          <h2 id="login-title" className="login-card__title" tabIndex={-1}>
             Bienvenido
           </h2>
           <p className="login-card__subtitle">
             Inicia sesión con tu correo institucional
           </p>
 
-          <LoginForm onSuccess={onSuccess} />
+          <LoginForm
+            onSuccess={onSuccess}
+            onVerificationRequired={onVerificationRequired}
+          />
+
+          <a className="login-register-link" href="#/registro">
+            ¿No tienes cuenta? Crear cuenta
+          </a>
 
           <p className="login-card__note">
             <InfoIcon />
