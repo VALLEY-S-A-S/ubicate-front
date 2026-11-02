@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { ALLOWED_EMAIL_DOMAINS } from '../constants'
 import { isAdminRole, login } from '../services/authApi'
 import { saveSession } from '../services/session'
+import { normalizeEmail } from '../validation/registration.js'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -77,12 +78,13 @@ function EyeOffIcon() {
   )
 }
 
-function LoginForm({ onSuccess }) {
+function LoginForm({ onSuccess, onVerificationRequired }) {
   const [values, setValues] = useState(INITIAL_VALUES)
   const [showPassword, setShowPassword] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
   const [serverError, setServerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState('')
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -90,6 +92,7 @@ function LoginForm({ onSuccess }) {
     setValues((current) => ({ ...current, [name]: value }))
     setFieldErrors((current) => ({ ...current, [name]: undefined }))
     setServerError('')
+    setPendingEmail('')
   }
 
   const validate = () => {
@@ -104,8 +107,7 @@ function LoginForm({ onSuccess }) {
       const domain = email.slice(email.lastIndexOf('@') + 1).toLowerCase()
 
       if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-        errors.correoInstitucional =
-          'Solo se permiten correos institucionales.'
+        errors.correoInstitucional = 'Solo se permiten correos institucionales.'
       }
     }
 
@@ -132,10 +134,11 @@ function LoginForm({ onSuccess }) {
 
     setIsSubmitting(true)
     setServerError('')
+    setPendingEmail('')
 
     try {
       const data = await login({
-        correoInstitucional: values.correoInstitucional.trim(),
+        correoInstitucional: normalizeEmail(values.correoInstitucional),
         contrasenia: values.contrasenia,
       })
 
@@ -159,6 +162,9 @@ function LoginForm({ onSuccess }) {
 
       onSuccess?.()
     } catch (error) {
+      if (error.status === 403 && error.data?.code === 'ACCOUNT_NOT_VERIFIED') {
+        setPendingEmail(normalizeEmail(values.correoInstitucional))
+      }
       // En 401 se usa un mensaje genérico para no revelar si el correo existe.
       setServerError(
         error.status === 401
@@ -243,9 +249,18 @@ function LoginForm({ onSuccess }) {
       </div>
 
       {serverError && (
-        <p className="login-form__error" role="alert">
+        <div className="login-form__error" role="alert">
           {serverError}
-        </p>
+          {pendingEmail && (
+            <a
+              className="login-pending-link"
+              href="#/verificar-correo"
+              onClick={() => onVerificationRequired?.(pendingEmail)}
+            >
+              Verificar mi correo o reenviar el enlace
+            </a>
+          )}
+        </div>
       )}
 
       <button
