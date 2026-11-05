@@ -1,20 +1,13 @@
-import RegistrationLayout from '../components/RegistrationLayout'
+import RegistrationWebLayout from '../components/RegistrationWebLayout'
 import RegisterForm from '../components/RegisterForm'
 
 export default function RegisterPage({ onRegistered }) {
   return (
-    <RegistrationLayout
-      title="Crear cuenta"
-      subtitle="Regístrate con tu correo institucional"
+    <RegistrationWebLayout
+      title="Configura tu acceso"
+      subtitle="Completa tus datos para crear tu cuenta"
     >
       <RegisterForm onRegistered={onRegistered} />
-      <a className="registration-link" href="#/login">
-        ¿Ya tienes cuenta? Inicia sesión
-      </a>
-      <p className="registration-note">
-        <span aria-hidden="true">ⓘ</span> Solo se permiten cuentas
-        institucionales
-      </p>
-    </RegistrationLayout>
+    </RegistrationWebLayout>
   )
 }
