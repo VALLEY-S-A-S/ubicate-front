@@ -17,6 +17,7 @@ function RegistrationField({
   name,
   label,
   error,
+  hint,
   disabled,
   value,
   onChange,
@@ -26,8 +27,8 @@ function RegistrationField({
 }) {
   return (
     <div className="registration-field">
+      <label htmlFor={`register-${name}`}>{label}</label>
       <div className="registration-field__control">
-        <label htmlFor={`register-${name}`}>{label}</label>
         <input
           {...props}
           id={`register-${name}`}
@@ -41,6 +42,7 @@ function RegistrationField({
           aria-describedby={
             [
               error && `${name}-error`,
+              hint && `${name}-hint`,
               name === 'contrasenia' && 'password-requirements',
             ]
               .filter(Boolean)
@@ -49,6 +51,7 @@ function RegistrationField({
         />
         {children}
       </div>
+      {hint && <p className="registration-web__hint" id={`${name}-hint`}>{hint}</p>}
       {error && (
         <p className="registration-field__error" id={`${name}-error`}>
           {error}
@@ -136,12 +139,15 @@ export default function RegisterForm({ onRegistered }) {
         {...common('nombre')}
         label="Nombre completo"
         autoComplete="name"
+        placeholder="Escribe tu nombre y apellido"
         maxLength={150}
       />
       <RegistrationField
         {...common('correoInstitucional')}
         label="Correo institucional"
         type="email"
+        placeholder="tu.nombre@correounivalle.edu.co"
+        hint="Usa tu correo @correounivalle.edu.co"
         autoComplete="email"
         inputMode="email"
         autoCapitalize="none"
@@ -157,6 +163,7 @@ export default function RegisterForm({ onRegistered }) {
             }
             type={visible[name] ? 'text' : 'password'}
             autoComplete="new-password"
+            placeholder={name === 'contrasenia' ? 'Crea una contraseña segura' : 'Vuelve a escribir tu contraseña'}
             className="registration-password"
           >
             <button
@@ -172,7 +179,11 @@ export default function RegisterForm({ onRegistered }) {
               aria-label={`${visible[name] ? 'Ocultar' : 'Mostrar'} ${name === 'contrasenia' ? 'contraseña' : 'confirmación de contraseña'}`}
               aria-pressed={Boolean(visible[name])}
             >
-              {visible[name] ? 'Ocultar' : 'Mostrar'}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+                {visible[name] && <path d="m4 4 16 16" />}
+              </svg>
             </button>
           </RegistrationField>
           {name === 'contrasenia' && (
@@ -202,12 +213,17 @@ export default function RegisterForm({ onRegistered }) {
           {serverError}
         </p>
       )}
+      <p className="registration-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v6m0-10v1" /></svg>
+        Solo se permiten cuentas institucionales
+      </p>
       <button
         className="registration-primary"
         type="submit"
         disabled={submitting}
       >
         {submitting ? 'Creando cuenta…' : 'Crear cuenta'}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
       </button>
     </form>
   )
