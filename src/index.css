@@ -396,3 +396,11 @@ button {
 .logout-dialog-btn-confirm:hover {
   background: #8e1417;
 }
+
+.session-warning {
+  margin: 0;
+  padding: 12px 24px;
+  background: #fff2d6;
+  color: #704600;
+  font-size: 14px;
+}

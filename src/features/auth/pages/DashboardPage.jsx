@@ -9,13 +9,16 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import UsuariosPage from '../../usuarios/pages/UsuariosPage'
 import BloquesPage from '../../espacios/pages/BloquesPage'
 import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 
-const DashboardPage = ({ onLogout, session, route }) => {
+const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
   const menuRef = useRef(null)
 
   useEffect(() => {
@@ -49,11 +52,15 @@ const DashboardPage = ({ onLogout, session, route }) => {
     setShowLogoutDialog(true)
   }
 
-  const handleLogoutConfirm = () => {
-    setShowLogoutDialog(false)
-    onLogout?.()
+  const handleLogoutConfirm = async () => {
+    if (loggingOut) return
+    setLoggingOut(true); setLogoutError('')
+    try { await onRequestLogout(); setShowLogoutDialog(false) }
+    catch (error) { setLogoutError(error.message) }
+    finally { setLoggingOut(false) }
   }
 
+  const isUsuarios = route === '/dashboard/usuarios'
   const isEspacios = route === '/dashboard/espacios'
   const isBloques = route === '/dashboard/espacios/bloques'
   const isGestionEspacios = route === '/dashboard/espacios/espacios'
@@ -65,6 +72,7 @@ const DashboardPage = ({ onLogout, session, route }) => {
         <aside className="dashboard-sidebar">
           <h2 className="sidebar-header">Menú</h2>
           <nav className="sidebar-nav">
+            <a href="#/dashboard/usuarios" className={`sidebar-link${isUsuarios ? ' active' : ''}`}>Importar usuarios</a>
             <a
               href="#/dashboard/espacios"
               className={`sidebar-link${route?.startsWith('/dashboard/espacios') ? ' active' : ''}`}
@@ -80,7 +88,7 @@ const DashboardPage = ({ onLogout, session, route }) => {
           <header className="dashboard-header">
             <div className="breadcrumb">
               Administración
-              {isBloques ? (
+              {isUsuarios ? <>{' > '}<span>Importar usuarios</span></> : isBloques ? (
                 <>
                   {' > '}
                   Administrar espacios
@@ -141,7 +149,7 @@ const DashboardPage = ({ onLogout, session, route }) => {
 
           {/* Área de contenido */}
           <div className="dashboard-main">
-            {isBloques ? (
+            {isUsuarios ? <UsuariosPage token={session?.token} /> : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (
               <GestionEspaciosPage
@@ -170,10 +178,12 @@ const DashboardPage = ({ onLogout, session, route }) => {
             aria-labelledby="logout-dialog-title"
           >
             <p id="logout-dialog-title">¿Deseas cerrar sesión?</p>
+            {logoutError && <p role="alert">{logoutError}</p>}
             <div className="logout-dialog-actions">
               <button
                 type="button"
                 className="logout-dialog-btn logout-dialog-btn-cancel"
+                disabled={loggingOut}
                 onClick={() => setShowLogoutDialog(false)}
               >
                 Cancelar
@@ -181,9 +191,10 @@ const DashboardPage = ({ onLogout, session, route }) => {
               <button
                 type="button"
                 className="logout-dialog-btn logout-dialog-btn-confirm"
+                disabled={loggingOut}
                 onClick={handleLogoutConfirm}
               >
-                Cerrar sesión
+                {loggingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
               </button>
             </div>
           </div>

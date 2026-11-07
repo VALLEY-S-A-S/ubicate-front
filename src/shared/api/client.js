@@ -1,17 +1,4 @@
-/**
- * Cliente HTTP base de Ubícate.
- * Autor: Lady Johana Vidal Sevillano
- *
- * Centraliza la URL del backend, serializa el body como JSON y convierte
- * las respuestas de error en ApiError para que las features no usen fetch
- * directamente.
- */
-
-// Se puede sobreescribir con VITE_API_URL; se quita la barra final para unir rutas.
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080').replace(
-  /\/+$/,
-  '',
-)
+const API_URL = (import.meta.env?.VITE_API_URL ?? 'http://localhost:8080').replace(/\/+$/, '')
 
 export class ApiError extends Error {
   constructor(message, status = 0, data = null) {
@@ -22,41 +9,28 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiRequest(path, { method = 'GET', body, token } = {}) {
-  const headers = { Accept: 'application/json' }
-
-  if (body !== undefined) {
-    headers['Content-Type'] = 'application/json'
-  }
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
-
+export async function apiRequest(path, { method = 'GET', body, token, headers: extraHeaders, signal, responseType = 'json' } = {}) {
+  const multipart = typeof FormData !== 'undefined' && body instanceof FormData
+  const headers = { Accept: responseType === 'blob' ? '*/*' : 'application/json', ...extraHeaders }
+  if (body !== undefined && !multipart) headers['Content-Type'] = 'application/json'
+  if (token) headers.Authorization = `Bearer ${token}`
   let response
-
   try {
     response = await fetch(`${API_URL}${path}`, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      method, headers, signal, cache: 'no-store', credentials: 'omit',
+      body: body === undefined ? undefined : multipart ? body : JSON.stringify(body),
     })
-  } catch {
-    // Errores de red o backend apagado: fetch no devuelve respuesta.
-    throw new ApiError(
-      'No se pudo conectar con el servidor. Verifica que el backend esté en línea.',
-    )
+  } catch (error) {
+    if (error.name === 'AbortError') throw error
+    throw new ApiError('No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.')
   }
-
-  const data = await response.json().catch(() => null)
-
   if (!response.ok) {
-    throw new ApiError(
-      data?.message ?? 'Ocurrió un error inesperado. Inténtalo de nuevo.',
-      response.status,
-      data,
-    )
+    const data = await response.json().catch(() => null)
+    if (response.status === 401 && token && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ubicate:unauthorized', { detail: { token } }))
+    }
+    throw new ApiError(data?.message ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.', response.status, data)
   }
-
-  return data
+  if (response.status === 204) return null
+  return responseType === 'blob' ? response.blob() : response.json().catch(() => null)
 }
