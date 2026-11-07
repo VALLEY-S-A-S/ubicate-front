@@ -6,9 +6,9 @@
  * guarda la sesión antes de avisar a la página para que continúe el flujo.
  */
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ALLOWED_EMAIL_DOMAINS } from '../constants'
-import { isAdminRole, login } from '../services/authApi'
+import { isAdminRole, login, me } from '../services/authApi'
 import { saveSession } from '../services/session'
 import { normalizeEmail } from '../validation/registration.js'
 
@@ -79,6 +79,9 @@ function EyeOffIcon() {
 }
 
 function LoginForm({ onSuccess, onVerificationRequired }) {
+  const mounted = useRef(true)
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false } }, [])
+  const busy = useRef(false)
   const [values, setValues] = useState(INITIAL_VALUES)
   const [showPassword, setShowPassword] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
@@ -121,7 +124,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if (isSubmitting) {
+    if (busy.current) {
       return
     }
 
@@ -132,6 +135,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
       return
     }
 
+    busy.current = true
     setIsSubmitting(true)
     setServerError('')
     setPendingEmail('')
@@ -142,6 +146,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
         contrasenia: values.contrasenia,
       })
 
+      if (!mounted.current) return
       // La web es solo para administradores; el resto de roles usa la app móvil.
       if (!isAdminRole(data.rol)) {
         setServerError(
@@ -150,19 +155,15 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
         return
       }
 
-      saveSession({
-        token: data.token,
-        user: {
-          id: data.id,
-          correoInstitucional: data.correoInstitucional,
-          nombre: data.nombre,
-          rol: data.rol,
-          sedeId: data.sedeId,
-        },
-      })
-
-      onSuccess?.()
+      const profile = await me(data.token)
+      if (!mounted.current) return
+      if (!isAdminRole(profile?.rol)) throw new Error('Usa la aplicación móvil para acceder con esta cuenta.')
+      const session = { token: data.token, user: profile }
+      saveSession(session)
+      setValues(INITIAL_VALUES)
+      onSuccess?.(session)
     } catch (error) {
+      if (!mounted.current) return
       if (error.status === 403 && error.data?.code === 'ACCOUNT_NOT_VERIFIED') {
         setPendingEmail(normalizeEmail(values.correoInstitucional))
       }
@@ -173,7 +174,8 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
           : error.message,
       )
     } finally {
-      setIsSubmitting(false)
+      busy.current = false
+      if (mounted.current) setIsSubmitting(false)
     }
   }
 

@@ -46,3 +46,12 @@ export function validateRegistration(values) {
     errors.confirmacion = 'Las contraseñas no coinciden.'
   return errors
 }
+
+export function validatePassword(values) {
+  const errors = {}
+  if (passwordRequirements(values.contrasenia).some(({ met }) => !met))
+    errors.contrasenia = 'Usa mínimo 8 caracteres, una mayúscula y un número.'
+  if (!values.confirmacion) errors.confirmacion = 'Confirma tu contraseña.'
+  else if (values.contrasenia !== values.confirmacion) errors.confirmacion = 'Las contraseñas no coinciden.'
+  return errors
+}

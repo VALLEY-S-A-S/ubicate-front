@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { register } from '../services/authApi'
 import {
   normalizeEmail,
@@ -11,6 +11,7 @@ const INITIAL_VALUES = {
   correoInstitucional: '',
   contrasenia: '',
   confirmacion: '',
+  bootstrapKey: '',
 }
 
 function RegistrationField({
@@ -61,12 +62,14 @@ function RegistrationField({
   )
 }
 
-export default function RegisterForm({ onRegistered }) {
+export default function RegisterForm({ onRegistered, onClosed }) {
   const [values, setValues] = useState(INITIAL_VALUES)
   const [errors, setErrors] = useState({})
   const [serverError, setServerError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [visible, setVisible] = useState({})
+  const mounted = useRef(true)
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false } }, [])
   const busy = useRef(false)
   const form = useRef(null)
 
@@ -84,6 +87,7 @@ export default function RegisterForm({ onRegistered }) {
     event.preventDefault()
     if (busy.current) return
     const nextErrors = validateRegistration(values)
+    if (!values.bootstrapKey.trim()) nextErrors.bootstrapKey = 'Ingresa la clave de configuración inicial.'
     setErrors(nextErrors)
     setServerError('')
     if (Object.keys(nextErrors).length) {
@@ -98,24 +102,19 @@ export default function RegisterForm({ onRegistered }) {
         nombre: values.nombre.trim(),
         correoInstitucional,
         contrasenia: values.contrasenia,
-      })
+      }, values.bootstrapKey)
+      if (!mounted.current) return
       setValues(INITIAL_VALUES)
       onRegistered(correoInstitucional)
     } catch (error) {
-      if (error.status === 409) {
-        setErrors({
-          correoInstitucional:
-            'Este correo ya está registrado. Inicia sesión para continuar o reenviar la verificación.',
-        })
-      }
-      setServerError(
-        error.status === 409
-          ? 'No se pudo crear la cuenta: el correo ya está registrado.'
-          : error.message,
-      )
+      if (!mounted.current) return
+      if (error.status === 409 && error.data?.code === 'BOOTSTRAP_CLOSED') { onClosed?.(); return }
+      setValues(current => ({ ...current, bootstrapKey: '' }))
+      setServerError(error.data?.code === 'BOOTSTRAP_INVALID_KEY' ? 'La clave de configuración es incorrecta.' : error.message)
+
     } finally {
       busy.current = false
-      setSubmitting(false)
+      if (mounted.current) setSubmitting(false)
     }
   }
 
@@ -154,6 +153,8 @@ export default function RegisterForm({ onRegistered }) {
         spellCheck={false}
         maxLength={150}
       />
+      <RegistrationField {...common('bootstrapKey')} label="Clave de configuración inicial"
+        type="password" autoComplete="off" hint="Solicita esta clave a quien administra el despliegue." />
       {['contrasenia', 'confirmacion'].map((name) => (
         <div key={name}>
           <RegistrationField
@@ -215,14 +216,14 @@ export default function RegisterForm({ onRegistered }) {
       )}
       <p className="registration-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v6m0-10v1" /></svg>
-        Solo se permiten cuentas institucionales
+        Esta configuración crea al primer administrador
       </p>
       <button
         className="registration-primary"
         type="submit"
         disabled={submitting}
       >
-        {submitting ? 'Creando cuenta…' : 'Crear cuenta'}
+        {submitting ? 'Creando administrador…' : 'Crear administrador'}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
       </button>
     </form>

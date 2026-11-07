@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import RegistrationLayout from '../components/RegistrationLayout'
+import { isInstitutionalEmail } from '../validation/registration.js'
 import { resendVerification } from '../services/authApi'
 import {
   getPendingVerification,
@@ -8,7 +9,10 @@ import {
   savePendingVerification,
 } from '../services/verification.js'
 
-export default function VerifyEmailPage({ pending }) {
+export default function VerifyEmailPage({ pending, onEmail }) {
+  const [email, setEmail] = useState(pending?.email ?? '')
+  const [changing, setChanging] = useState(false)
+  const [emailError, setEmailError] = useState('')
   const [availableAt, setAvailableAt] = useState(
     pending?.resendAvailableAt ?? 0,
   )
@@ -55,27 +59,27 @@ export default function VerifyEmailPage({ pending }) {
     }
   }
 
-  if (!pending) {
-    return (
-      <RegistrationLayout title="Verifica tu correo">
-        <p className="verification-copy">
-          Crea una cuenta o inicia sesión con tu cuenta pendiente para reenviar
-          el enlace de verificación.
-        </p>
-        <a className="registration-primary" href="#/registro">
-          Crear cuenta
-        </a>
-        <a className="registration-link" href="#/login">
-          Volver al inicio de sesión
-        </a>
-      </RegistrationLayout>
-    )
+  if (!pending || changing) {
+    return <RegistrationLayout title="Solicita un enlace" subtitle="Escribe el correo institucional asociado a tu cuenta.">
+      <form className="registration-form" onSubmit={event => {
+        event.preventDefault()
+        if (!isInstitutionalEmail(email)) { setEmailError('Usa tu correo @correounivalle.edu.co.'); return }
+        setChanging(false); onEmail(email)
+      }} noValidate>
+        <div className="registration-field"><label htmlFor="resend-email">Correo institucional</label>
+          <input id="resend-email" type="email" maxLength={150} autoComplete="email" value={email} onChange={event => { setEmail(event.target.value); setEmailError('') }} aria-invalid={Boolean(emailError)} aria-describedby={emailError ? 'resend-error' : undefined} required />
+          {emailError && <p id="resend-error" role="alert">{emailError}</p>}
+        </div>
+        <button className="registration-primary" type="submit">Continuar</button>
+      </form>
+      <a className="registration-link" href="#/login">Volver al inicio de sesión</a>
+    </RegistrationLayout>
   }
 
   return (
     <RegistrationLayout
       title="Revisa tu correo"
-      subtitle="Busca el enlace de verificación en:"
+      subtitle="Solicita un enlace para esta cuenta:"
     >
       <p className="verification-email">{pending.email}</p>
       <p className="verification-copy">
@@ -113,8 +117,9 @@ export default function VerifyEmailPage({ pending }) {
       <a className="registration-link" href="#/login">
         Volver al inicio de sesión
       </a>
+      <button className="registration-link" type="button" onClick={() => { setEmail(pending.email); setChanging(true) }}>Usar otro correo</button>
       <p className="verification-hint verification-hint--last">
-        Las cuentas de estudiantes acceden desde la aplicación móvil.
+        Las cuentas no administrativas acceden desde la aplicación móvil. La solicitud no garantiza entrega inmediata.
       </p>
     </RegistrationLayout>
   )

@@ -30,7 +30,7 @@ function InfoIcon() {
   )
 }
 
-function LoginPage({ onSuccess, onVerificationRequired }) {
+function LoginPage({ onSuccess, onVerificationRequired, notice, setup, onRetrySetup }) {
   return (
     <main className="login-page">
       <div className="login-page__content">
@@ -53,14 +53,17 @@ function LoginPage({ onSuccess, onVerificationRequired }) {
             Inicia sesión con tu correo institucional
           </p>
 
+          {notice && <p role="status" className="login-card__subtitle">{notice}</p>}
           <LoginForm
             onSuccess={onSuccess}
             onVerificationRequired={onVerificationRequired}
           />
 
-          <a className="login-register-link" href="#/registro">
-            ¿No tienes cuenta? Crear cuenta
-          </a>
+          {setup?.state === 'ready' && setup.requiresSetup && <a className="login-register-link" href="#/registro">Configurar primer administrador</a>}
+          {setup?.state === 'loading' && <p className="login-card__note" role="status">Comprobando configuración inicial…</p>}
+          {setup?.state === 'error' && <p className="login-card__note">No se pudo comprobar la configuración. <button type="button" onClick={onRetrySetup}>Reintentar</button></p>}
+          {setup?.state === 'ready' && !setup.requiresSetup && <p className="login-card__note">Las cuentas nuevas las crea el administrador de tu institución.</p>}
+          <a className="login-register-link" href="#/verificar-correo">¿Necesitas un enlace de activación?</a>
 
           <p className="login-card__note">
             <InfoIcon />
