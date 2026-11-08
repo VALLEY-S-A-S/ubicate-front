@@ -85,8 +85,8 @@ export default function UsuariosPage({ token }) {
     <header><p className="usuarios-eyebrow">Gestión de acceso</p><h1 id="usuarios-title" tabIndex={-1}>Importar usuarios</h1>
       <p>Crea cuentas institucionales con una plantilla Excel. Cada persona recibirá un enlace para definir su contraseña.</p></header>
     <div className="usuarios-grid">
-      <section className="usuarios-card"><h2>1. Prepara el archivo</h2><p>Una hoja con las columnas <strong>nombre, correoInstitucional, rol</strong>. Máximo 1000 usuarios y 5 MiB.</p>
-        <p>Roles: ADMIN, ESTUDIANTE, DOCENTE, LOGISTICA y OPERARIO. Todas las cuentas se asignan a tu sede.</p>
+      <section className="usuarios-card"><h2>1. Prepara el archivo</h2><p>Una hoja con las columnas <strong>ITEM, CEDULA O CODIGO, APELLIDOS, NOMBRE, CARGO, CORREO INSTITUCIONAL</strong>. Máximo 1000 usuarios y 5 MiB.</p>
+        <p>Cargos: ESTUDIANTE, AUXILIAR ADMINISTRATIVA, AUXILIAR DE SERVICIOS DE SALUD, AUXILIAR DE SERVICIOS GENERALES, PROFESIONAL, TECNICO, DOCENTE y OPS. Solo estudiantes y docentes pueden reservar. Todas las cuentas se asignan a tu sede. Los cinco datos personales son obligatorios; ITEM es opcional. Descarga la nueva plantilla: el formato anterior ya no se admite.</p>
         <button className="usuarios-button usuarios-button--secondary" disabled={Boolean(busy)} onClick={descargar}>{busy === 'plantilla' ? 'Descargando…' : 'Descargar plantilla Excel'}</button>
       </section>
       <section className="usuarios-card"><h2>2. Crea las cuentas</h2><form onSubmit={cargar} aria-busy={busy === 'importar'}>
@@ -98,7 +98,7 @@ export default function UsuariosPage({ token }) {
     </div>
     {message && <p role="status" className="usuarios-message">{message}</p>}
     {error && <p role="alert" className="usuarios-error">{error}</p>}
-    {errores.length > 0 && <div className="usuarios-table-wrap"><table><caption>Errores del archivo: corrige las filas y vuelve a importar.</caption><thead><tr><th>Fila</th><th>Campo</th><th>Detalle</th></tr></thead><tbody>{errores.map((item, index) => <tr key={index}><td>{item.fila === 0 ? 'Archivo' : item.fila}</td><td>{item.campo}</td><td>{item.mensaje}</td></tr>)}</tbody></table></div>}
+    {errores.length > 0 && <div className="usuarios-table-wrap"><table><caption>Errores del archivo: corrige las filas y vuelve a importar.</caption><thead><tr><th>Fila</th><th>Campo</th><th>Detalle</th></tr></thead><tbody>{errores.map((item, index) => <tr key={index}><td>{item.fila === 0 ? 'Archivo' : item.fila}</td><td>{{correoInstitucional: "CORREO INSTITUCIONAL", cedulaOCodigo: "CEDULA O CODIGO", nombres: "NOMBRE", apellidos: "APELLIDOS", cargo: "CARGO"}[item.campo] ?? item.campo}</td><td>{item.mensaje}</td></tr>)}</tbody></table></div>}
     <section className="usuarios-card usuarios-results"><div className="usuarios-result-heading"><h2>Seguimiento de importación</h2>
       <form className="usuarios-query" onSubmit={event => { event.preventDefault(); if (/^[1-9]\d*$/.test(consulta) && Number(consulta) <= 2147483647) abrir(consulta); else setError('Introduce un número de importación válido.') }}>
         <label htmlFor="usuarios-lote">Número de importación</label><input id="usuarios-lote" type="text" inputMode="numeric" value={consulta} onChange={event => setConsulta(event.target.value)} disabled={Boolean(busy)} />
@@ -113,7 +113,7 @@ export default function UsuariosPage({ token }) {
           <button className="usuarios-button" disabled={Boolean(busy) || !lote.correos.FALLIDO} onClick={() => ejecutar('reintentar', async () => {
             const result = await reintentar(lote.id, token); if (!mounted.current) return; setMessage(`${result.encolados} correos encolados para reintento.`); setRevision(value => value + 1)
           })}>{busy === 'reintentar' ? 'Solicitando…' : 'Reintentar correos fallidos'}</button></div>
-        <div className="usuarios-table-wrap"><table><caption>Resultado por usuario</caption><thead><tr><th>Fila</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Cuenta</th><th>Correo de activación</th><th>Intentos</th></tr></thead><tbody>{lote.filas.map(row => <tr key={row.usuarioId}><td>{row.fila}</td><td>{row.nombre}</td><td>{row.correoInstitucional}</td><td>{row.rol}</td><td>{CUENTAS[row.estadoUsuario] ?? row.estadoUsuario}</td><td><span className={`usuarios-status usuarios-status--${row.estadoCorreo.toLowerCase()}`}>{CORREOS[row.estadoCorreo] ?? row.estadoCorreo}</span></td><td>{row.intentos}</td></tr>)}</tbody></table></div>
+        <div className="usuarios-table-wrap"><table><caption>Resultado por usuario</caption><thead><tr><th>Fila</th><th>ITEM</th><th>Cédula o código</th><th>Nombres</th><th>Apellidos</th><th>Cargo</th><th>Correo</th><th>Rol</th><th>Cuenta</th><th>Correo de activación</th><th>Intentos</th></tr></thead><tbody>{lote.filas.map(row => <tr key={row.usuarioId}><td>{row.fila}</td><td>{row.item ?? "No registrado"}</td><td>{row.cedulaOCodigo ?? "No registrado"}</td><td>{row.nombres ?? row.nombre}</td><td>{row.apellidos ?? "No registrado"}</td><td>{row.cargo ?? "No registrado"}</td><td>{row.correoInstitucional}</td><td>{row.rol}</td><td>{CUENTAS[row.estadoUsuario] ?? row.estadoUsuario}</td><td><span className={`usuarios-status usuarios-status--${row.estadoCorreo.toLowerCase()}`}>{CORREOS[row.estadoCorreo] ?? row.estadoCorreo}</span></td><td>{row.intentos}</td></tr>)}</tbody></table></div>
       </>}
       {!loteId && <p>Al crear cuentas aparecerá aquí el resultado. También puedes consultar una importación por su número.</p>}
       {loteId && error && <button className="usuarios-button usuarios-button--secondary" onClick={() => { setLote(null); setError(''); setRevision(value => value + 1) }}>Volver a consultar</button>}

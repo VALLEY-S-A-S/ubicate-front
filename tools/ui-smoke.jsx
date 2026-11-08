@@ -39,7 +39,7 @@ check('enlace incompleto no ofrece formulario de activación', () => {
 check('módulo de usuarios renderiza navegación, carga y consulta', () => {
   window.location.hash = '#/dashboard/usuarios'
   const html = renderToStaticMarkup(<DashboardPage route="/dashboard/usuarios" session={{ token: 'jwt', user: { nombre: 'Admin' } }} />)
-  for (const text of ['Descargar plantilla Excel', 'usuarios-archivo', 'Seguimiento de importación']) assert.ok(html.includes(text))
+  for (const text of ['Descargar plantilla Excel', 'usuarios-archivo', 'Seguimiento de importación', 'CEDULA O CODIGO', 'AUXILIAR ADMINISTRATIVA' ]) assert.ok(html.includes(text))
   assert.ok(!html.includes('Bearer jwt'))
 })
 check('correo verificado se presenta en campo de solo lectura', () => {

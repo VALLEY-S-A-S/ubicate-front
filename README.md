@@ -1,5 +1,30 @@
 # Ubícate · Frontend
 
+## Importación institucional (formato vigente)
+
+Rama de este cambio: `fix/importacion-institucional-front`.
+La plantilla anterior de tres columnas ya no se admite. Descargar la nueva
+plantilla desde el panel web y completar una sola hoja con estas columnas:
+
+`ITEM | CEDULA O CODIGO | APELLIDOS | NOMBRE | CARGO | CORREO INSTITUCIONAL`
+
+Los cinco datos personales son obligatorios; ITEM es opcional. Identificación
+se conserva como texto sin distinguir cédula de código. Usar texto para
+preservar ceros iniciales; se admiten enteros no negativos de hasta 15 dígitos.
+Los ocho cargos son ESTUDIANTE, AUXILIAR ADMINISTRATIVA, AUXILIAR DE SERVICIOS
+DE SALUD, AUXILIAR DE SERVICIOS GENERALES, PROFESIONAL, TECNICO, DOCENTE y OPS.
+Solo ESTUDIANTE y DOCENTE reciben permisos de reserva desde esta importación;
+los otros cargos usan el rol interno PERSONAL (consulta de espacios y perfil).
+El archivo nunca concede ADMIN. Los permisos de cuentas anteriores se conservan.
+
+Backend requiere V16 y expone nombres, apellidos, cedulaOCodigo y cargo en login,
+/me y detalle de importación. Web muestra los datos en el seguimiento; Android
+los conserva en almacenamiento cifrado y muestra cargo y «Cédula o código».
+Distribuir Android compatible con PERSONAL antes de activar personal: las
+versiones anteriores rechazan ese rol. No inferir datos faltantes de cuentas
+históricas; en móvil el código anterior sirve de respaldo visual.
+
+
 Portal administrativo en React 19 y Vite 8. Rama:
 `feature/auth-roles-importacion-front`, creada desde `dev`.
 Plan: [autenticación, activación e importaciones](docs/frontend-plan.md).
