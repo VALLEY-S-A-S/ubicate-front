@@ -24,26 +24,26 @@ export default function EspacioDetalle({ espacio, dias, onClose }) {
 
   return (
     <div
-      className="espacio-detalle"
+      className="horario-detalle"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose?.()
       }}
     >
       <div
-        className="espacio-detalle__contenido"
+        className="horario-detalle__contenido"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="espacio-detalle-titulo"
+        aria-labelledby="horario-detalle-titulo"
       >
-        <header className="espacio-detalle__cabecera">
+        <header className="horario-detalle__cabecera">
           <div>
-            <p className="espacio-detalle__codigo">{espacio.codigo}</p>
-            <h3 id="espacio-detalle-titulo">{espacio.nombre}</h3>
+            <p className="horario-detalle__codigo">{espacio.codigo}</p>
+            <h3 id="horario-detalle-titulo">{espacio.nombre}</h3>
           </div>
           <button
             type="button"
-            className="espacio-detalle__cerrar"
+            className="horario-detalle__cerrar"
             onClick={onClose}
             aria-label="Cerrar información del espacio"
           >
@@ -51,7 +51,7 @@ export default function EspacioDetalle({ espacio, dias, onClose }) {
           </button>
         </header>
 
-        <dl className="espacio-detalle__datos">
+        <dl className="horario-detalle__datos">
           <div>
             <dt>Tipo</dt>
             <dd>{espacio.tipoEspacioNombre ?? 'Sin tipo'}</dd>
@@ -70,7 +70,7 @@ export default function EspacioDetalle({ espacio, dias, onClose }) {
           </div>
         </dl>
 
-        <section className="espacio-detalle__ocupaciones">
+        <section className="horario-detalle__ocupaciones">
           <h4>Asignaciones</h4>
           {ocupaciones.length === 0 ? (
             <p>No hay asignaciones registradas para este espacio.</p>
@@ -78,23 +78,23 @@ export default function EspacioDetalle({ espacio, dias, onClose }) {
             <ul>
               {ocupaciones.map((ocupacion) => (
                 <li key={ocupacion.id}>
-                  <span className="espacio-detalle__dia">
+                  <span className="horario-detalle__dia">
                     {nombreDia(ocupacion.diaSemana, dias)}
                   </span>
-                  <span className="espacio-detalle__hora">
+                  <span className="horario-detalle__hora">
                     {formatearHora(ocupacion.horaInicio)} -{' '}
                     {formatearHora(ocupacion.horaFin)}
                   </span>
-                  <span className="espacio-detalle__titulo">
+                  <span className="horario-detalle__titulo">
                     {ocupacion.titulo ?? 'Asignación'}
                   </span>
                   {ocupacion.docenteNombre && (
-                    <span className="espacio-detalle__docente">
+                    <span className="horario-detalle__docente">
                       {ocupacion.docenteNombre}
                     </span>
                   )}
                   {(ocupacion.asignaturaCodigo || ocupacion.grupoCodigo) && (
-                    <span className="espacio-detalle__meta">
+                    <span className="horario-detalle__meta">
                       {[ocupacion.asignaturaCodigo, ocupacion.grupoCodigo]
                         .filter(Boolean)
                         .join(' · ')}
@@ -106,8 +106,8 @@ export default function EspacioDetalle({ espacio, dias, onClose }) {
           )}
         </section>
 
-        <div className="espacio-detalle__acciones">
-          <button type="button" className="espacio-detalle__boton" onClick={onClose}>
+        <div className="horario-detalle__acciones">
+          <button type="button" className="horario-detalle__boton" onClick={onClose}>
             Cerrar
           </button>
         </div>

@@ -529,7 +529,7 @@
 
 /* --- Detalle del espacio --- */
 
-.espacio-detalle {
+.horario-detalle {
   position: fixed;
   inset: 0;
   z-index: 120;
@@ -540,7 +540,7 @@
   background: rgba(0, 0, 0, 0.42);
 }
 
-.espacio-detalle__contenido {
+.horario-detalle__contenido {
   width: min(560px, 100%);
   max-height: 86vh;
   overflow: auto;
@@ -550,7 +550,7 @@
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
 }
 
-.espacio-detalle__cabecera {
+.horario-detalle__cabecera {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -558,7 +558,7 @@
   margin-bottom: 16px;
 }
 
-.espacio-detalle__codigo {
+.horario-detalle__codigo {
   margin: 0;
   font-size: 11px;
   font-weight: 600;
@@ -567,13 +567,13 @@
   color: var(--color-brand);
 }
 
-.espacio-detalle__cabecera h3 {
+.horario-detalle__cabecera h3 {
   margin: 2px 0 0;
   font-size: 18px;
   color: var(--color-text-primary);
 }
 
-.espacio-detalle__cerrar {
+.horario-detalle__cerrar {
   width: 32px;
   height: 32px;
   border: 0;
@@ -584,24 +584,24 @@
   cursor: pointer;
 }
 
-.espacio-detalle__cerrar:hover {
+.horario-detalle__cerrar:hover {
   background: #e5e7eb;
 }
 
-.espacio-detalle__datos {
+.horario-detalle__datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin: 0 0 18px;
 }
 
-.espacio-detalle__datos div {
+.horario-detalle__datos div {
   padding: 10px 12px;
   border: 1px solid #e5e7eb;
   border-radius: var(--radius-sm);
 }
 
-.espacio-detalle__datos dt {
+.horario-detalle__datos dt {
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -609,25 +609,25 @@
   color: var(--color-text-secondary);
 }
 
-.espacio-detalle__datos dd {
+.horario-detalle__datos dd {
   margin: 2px 0 0;
   font-size: 13px;
   color: var(--color-text-primary);
 }
 
-.espacio-detalle__ocupaciones h4 {
+.horario-detalle__ocupaciones h4 {
   margin: 0 0 8px;
   font-size: 14px;
   color: var(--color-text-primary);
 }
 
-.espacio-detalle__ocupaciones p {
+.horario-detalle__ocupaciones p {
   margin: 0;
   font-size: 13px;
   color: var(--color-text-secondary);
 }
 
-.espacio-detalle__ocupaciones ul {
+.horario-detalle__ocupaciones ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -636,7 +636,7 @@
   gap: 8px;
 }
 
-.espacio-detalle__ocupaciones li {
+.horario-detalle__ocupaciones li {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -645,40 +645,40 @@
   border-radius: var(--radius-sm);
 }
 
-.espacio-detalle__dia {
+.horario-detalle__dia {
   font-size: 11px;
   font-weight: 600;
   color: var(--color-brand);
 }
 
-.espacio-detalle__hora {
+.horario-detalle__hora {
   font-size: 11px;
   color: var(--color-text-secondary);
 }
 
-.espacio-detalle__titulo {
+.horario-detalle__titulo {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
-.espacio-detalle__docente {
+.horario-detalle__docente {
   font-size: 12px;
   color: var(--color-text-primary);
 }
 
-.espacio-detalle__meta {
+.horario-detalle__meta {
   font-size: 11px;
   color: var(--color-text-secondary);
 }
 
-.espacio-detalle__acciones {
+.horario-detalle__acciones {
   display: flex;
   justify-content: flex-end;
   margin-top: 18px;
 }
 
-.espacio-detalle__boton {
+.horario-detalle__boton {
   height: 36px;
   padding: 0 18px;
   border: 0;
@@ -690,7 +690,7 @@
   cursor: pointer;
 }
 
-.espacio-detalle__boton:hover {
+.horario-detalle__boton:hover {
   background: var(--color-brand-strong);
 }
 
