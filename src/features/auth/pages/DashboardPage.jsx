@@ -13,6 +13,7 @@ import UsuariosPage from '../../usuarios/pages/UsuariosPage'
 import BloquesPage from '../../espacios/pages/BloquesPage'
 import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
+import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
 
 const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -64,6 +65,8 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const isEspacios = route === '/dashboard/espacios'
   const isBloques = route === '/dashboard/espacios/bloques'
   const isGestionEspacios = route === '/dashboard/espacios/espacios'
+  // lady vidal - HU-06: sección de asignaciones con filtros y horario.
+  const isAsignaciones = route === '/dashboard/asignaciones'
 
   return (
     <main className="dashboard-page">
@@ -79,6 +82,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             >
               Administrar espacios
             </a>
+            <a
+              href="#/dashboard/asignaciones"
+              className={`sidebar-link${isAsignaciones ? ' active' : ''}`}
+            >
+              Asignaciones
+            </a>
           </nav>
         </aside>
 
@@ -88,7 +97,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
           <header className="dashboard-header">
             <div className="breadcrumb">
               Administración
-              {isUsuarios ? <>{' > '}<span>Importar usuarios</span></> : isBloques ? (
+              {isUsuarios ? <>{' > '}<span>Importar usuarios</span></> : isAsignaciones ? (
+                <>
+                  {' > '}
+                  <span>Asignaciones</span>
+                </>
+              ) : isBloques ? (
                 <>
                   {' > '}
                   Administrar espacios
@@ -149,7 +163,13 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
 
           {/* Área de contenido */}
           <div className="dashboard-main">
-            {isUsuarios ? <UsuariosPage token={session?.token} /> : isBloques ? (
+            {isUsuarios ? <UsuariosPage token={session?.token} /> : isAsignaciones ? (
+              <AsignacionesPage
+                token={session?.token}
+                sedeId={session?.user?.sedeId}
+                onLogout={onLogout}
+              />
+            ) : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (
               <GestionEspaciosPage

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import App from '../src/App.jsx'
 import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/ActivatePage.jsx'
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
+import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
 import { clearSession, saveSession } from '../src/features/auth/services/session.js'
 
 const storage = new Map()
@@ -46,6 +47,16 @@ check('correo verificado se presenta en campo de solo lectura', () => {
   assert.ok(html.includes('value="cuenta@correounivalle.edu.co"'))
   assert.match(html, /readonly=""/i)
   assert.ok(html.includes('Correo institucional de esta cuenta'))
+})
+check('módulo de asignaciones muestra filtros y estructura del horario', () => {
+  const html = renderToStaticMarkup(<AsignacionesPage token="jwt" sedeId={2} />)
+  for (const text of ['Asignaciones', 'Franjas', 'Buscar por nombre', 'Tipo de espacio', 'Bloque', 'Piso', 'Cargando horario…']) assert.ok(html.includes(text))
+  assert.ok(!html.includes('Bearer jwt'))
+})
+check('el panel enlaza la sección de asignaciones', () => {
+  const html = renderToStaticMarkup(<DashboardPage route="/dashboard/asignaciones" session={{ token: 'jwt', user: { nombre: 'Admin', sedeId: 2 } }} />)
+  assert.ok(html.includes('href="#/dashboard/asignaciones"'))
+  assert.ok(html.includes('Franjas'))
 })
 clearSession()
 console.log(`${count} comprobaciones de componentes aprobadas.`)
