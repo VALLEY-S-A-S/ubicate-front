@@ -1,65 +1,57 @@
-export default function EspaciosList({
-  espacios,
-  pendingId,
-  onToggleEstado,
-  onEdit,
-  onDelete,
-}) {
+import { TipoEspacioIcon, tipoColor } from './tipoEspacioVisual'
+
+function ubicacionDe(espacio) {
+  return [
+    espacio.bloqueNombre,
+    espacio.pisoNumero != null ? `Piso ${espacio.pisoNumero}` : null,
+    espacio.sedeNombre,
+  ]
+    .filter(Boolean)
+    .join(' · ') || 'Sin ubicación'
+}
+
+export default function EspaciosList({ espacios, selectedId, onSelect }) {
   if (espacios.length === 0) {
-    return <p className="espacios-state">Aún no hay espacios registrados</p>
+    return (
+      <p className="espacios-empty">
+        No se encuentran espacios en el sistema bajo los parámetros de búsqueda
+      </p>
+    )
   }
 
   return (
     <ul className="espacios-list">
       {espacios.map((espacio) => {
+        const activo = espacio.id === selectedId
         const deshabilitado = espacio.estado === 'DESHABILITADO'
-        const busy = pendingId === espacio.id
-        const ubicacion = espacio.bloqueNombre
-          ? `${espacio.bloqueNombre}, piso ${espacio.pisoNumero}`
-          : 'Sin ubicación'
+        const color = tipoColor(espacio.tipoEspacioId, deshabilitado)
 
         return (
-          <li key={espacio.id} className="espacios-list__item">
-            <div className="espacios-list__info">
-              <span className="espacios-list__codigo">{espacio.codigo}</span>
-              <span className="espacios-list__nombre">{espacio.nombre}</span>
-              <span className="espacios-list__meta">
-                {espacio.tipoEspacioNombre} · {ubicacion}
-              </span>
-            </div>
-
-            <span
-              className={`espacios-estado${deshabilitado ? ' espacios-estado--inactivo' : ''}`}
+          <li key={espacio.id}>
+            <button
+              type="button"
+              className={`espacio-item${activo ? ' espacio-item--active' : ''}`}
+              onClick={() => onSelect?.(espacio)}
+              aria-pressed={activo}
             >
-              {deshabilitado ? 'Deshabilitado' : 'Disponible'}
-            </span>
-
-            <div className="espacios-list__actions">
-              <button
-                type="button"
-                className="espacios-action"
-                disabled={busy}
-                onClick={() => onToggleEstado?.(espacio)}
+              <span
+                className="espacio-item__icono"
+                style={{ color: color.fg, background: color.bg }}
               >
-                {deshabilitado ? 'Habilitar' : 'Deshabilitar'}
-              </button>
-              <button
-                type="button"
-                className="espacios-action"
-                disabled={busy}
-                onClick={() => onEdit?.(espacio)}
+                <TipoEspacioIcon nombre={espacio.tipoEspacioNombre} />
+              </span>
+              <span className="espacio-item__body">
+                <span className="espacio-item__nombre">{espacio.nombre}</span>
+                <span className="espacio-item__meta">{ubicacionDe(espacio)}</span>
+              </span>
+              <span
+                className="espacio-item__tipo"
+                style={{ color: color.fg, background: color.bg }}
               >
-                Editar
-              </button>
-              <button
-                type="button"
-                className="espacios-action espacios-action--danger"
-                disabled={busy}
-                onClick={() => onDelete?.(espacio)}
-              >
-                Borrar
-              </button>
-            </div>
+                {espacio.tipoEspacioNombre}
+              </span>
+              <span className="espacio-item__chevron" aria-hidden="true">›</span>
+            </button>
           </li>
         )
       })}

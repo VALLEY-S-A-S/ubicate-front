@@ -22,6 +22,15 @@ export function validateEspacio(values = {}) {
     errors.nombre = 'El nombre no puede superar los 150 caracteres'
   }
 
+  const capacidad =
+    values.capacidad === '' || values.capacidad == null ? null : values.capacidad
+  if (capacidad != null) {
+    const capacidadNum = Number(capacidad)
+    if (!Number.isInteger(capacidadNum) || capacidadNum < 1) {
+      errors.capacidad = 'La capacidad debe ser un número entero mayor que 0'
+    }
+  }
+
   const bloqueId = values.bloqueId === '' ? null : values.bloqueId
   const piso = values.piso === '' ? null : values.piso
 
