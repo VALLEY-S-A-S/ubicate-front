@@ -37,6 +37,7 @@ incluyen en variables VITE_*, assets, URL ni almacenamiento del navegador.
 | `/#/verificar-correo` | Solicitar enlace para una cuenta pendiente |
 | `/#/dashboard/usuarios` | Plantilla Excel e importación |
 | `/#/dashboard/usuarios?lote=8` | Consultar una importación por número |
+| `/#/dashboard/asignaciones` | Filtrar y consultar el horario de asignaciones por espacio |
 | `/#/dashboard/espacios` | Administración de espacios existente |
 
 La navegación por hash permite recargar sin reglas especiales del servidor.

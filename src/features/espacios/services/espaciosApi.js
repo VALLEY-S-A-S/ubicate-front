@@ -1,7 +1,9 @@
 import { apiRequest } from '../../../shared/api/client'
 
-export function listarTiposEspacio() {
-  return apiRequest('/api/tipos-espacio')
+// lady vidal - HU-06: se acepta token opcional para reutilizar el catálogo
+// de tipos de espacio desde la vista de asignaciones.
+export function listarTiposEspacio(token) {
+  return apiRequest('/api/tipos-espacio', { token })
 }
 
 export function listarPisos(bloqueId) {
