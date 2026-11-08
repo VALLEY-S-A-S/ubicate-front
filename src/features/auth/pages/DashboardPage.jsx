@@ -14,6 +14,7 @@ import BloquesPage from '../../espacios/pages/BloquesPage'
 import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
+import CatalogoPage from '../../espacios/pages/CatalogoPage'
 
 const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -67,6 +68,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const isGestionEspacios = route === '/dashboard/espacios/espacios'
   // lady vidal - HU-06: sección de asignaciones con filtros y horario.
   const isAsignaciones = route === '/dashboard/asignaciones'
+  const isCatalogo = route === '/dashboard/catalogo'
 
   return (
     <main className="dashboard-page">
@@ -88,6 +90,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             >
               Asignaciones
             </a>
+            <a
+              href="#/dashboard/catalogo"
+              className={`sidebar-link${isCatalogo ? ' active' : ''}`}
+            >
+              Catálogo
+            </a>
           </nav>
         </aside>
 
@@ -102,7 +110,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                   {' > '}
                   <span>Asignaciones</span>
                 </>
-              ) : isBloques ? (
+              ) : isCatalogo ? <>{' > '}<span>Catálogo</span></> : isBloques ? (
                 <>
                   {' > '}
                   Administrar espacios
@@ -169,6 +177,8 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                 sedeId={session?.user?.sedeId}
                 onLogout={onLogout}
               />
+            ) : isCatalogo ? (
+              <CatalogoPage token={session?.token} />
             ) : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (

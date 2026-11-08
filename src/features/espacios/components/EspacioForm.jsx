@@ -7,6 +7,7 @@ function initialValues(espacio) {
     tipoEspacioId: espacio?.tipoEspacioId ?? '',
     codigo: espacio?.codigo ?? '',
     nombre: espacio?.nombre ?? '',
+    capacidad: espacio?.capacidad != null ? String(espacio.capacidad) : '',
     bloqueId: espacio?.bloqueId ?? '',
     piso: espacio?.pisoNumero != null ? String(espacio.pisoNumero) : '',
   }
@@ -71,6 +72,10 @@ export default function EspacioForm({
         nombre: values.nombre.trim(),
       }
 
+      if (values.capacidad !== '') {
+        body.capacidad = Number(values.capacidad)
+      }
+
       if (values.bloqueId !== '') {
         body.bloqueId = Number(values.bloqueId)
         body.piso = Number(values.piso)
@@ -93,7 +98,7 @@ export default function EspacioForm({
       }
 
       const serverErrors = error.data?.errors ?? {}
-      const fieldKeys = ['tipoEspacioId', 'codigo', 'nombre', 'piso', 'bloqueId']
+      const fieldKeys = ['tipoEspacioId', 'codigo', 'nombre', 'capacidad', 'piso', 'bloqueId']
       const fieldErrors = {}
 
       for (const key of fieldKeys) {
@@ -186,6 +191,27 @@ export default function EspacioForm({
         {errors.nombre && (
           <p className="espacio-field__error" id="espacio-nombre-error">
             {errors.nombre}
+          </p>
+        )}
+      </div>
+
+      <div className="espacio-field">
+        <label htmlFor="espacio-capacidad">Capacidad (opcional)</label>
+        <input
+          id="espacio-capacidad"
+          name="capacidad"
+          type="number"
+          min="1"
+          inputMode="numeric"
+          value={values.capacidad}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          aria-invalid={Boolean(errors.capacidad)}
+          aria-describedby={errors.capacidad ? 'espacio-capacidad-error' : undefined}
+        />
+        {errors.capacidad && (
+          <p className="espacio-field__error" id="espacio-capacidad-error">
+            {errors.capacidad}
           </p>
         )}
       </div>
