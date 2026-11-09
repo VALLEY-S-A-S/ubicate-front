@@ -4,6 +4,7 @@ import App from '../src/App.jsx'
 import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/ActivatePage.jsx'
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
 import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
+import ImportarHorariosPage from '../src/features/franjas/pages/ImportarHorariosPage.jsx'
 import { clearSession, saveSession } from '../src/features/auth/services/session.js'
 
 const storage = new Map()
@@ -52,6 +53,17 @@ check('módulo de asignaciones muestra filtros y estructura del horario', () => 
   const html = renderToStaticMarkup(<AsignacionesPage token="jwt" sedeId={2} />)
   for (const text of ['Asignaciones', 'Franjas', 'Buscar por nombre', 'Tipo de espacio', 'Bloque', 'Piso', 'Cargando horario…']) assert.ok(html.includes(text))
   assert.ok(!html.includes('Bearer jwt'))
+})
+check('módulo de horarios muestra plantilla, carga y conteos', () => {
+  const html = renderToStaticMarkup(<ImportarHorariosPage token="jwt" />)
+  for (const text of ['Importar horarios', 'Descargar plantilla Excel', 'horarios-archivo', '2. Sube el Excel', 'CATALOGO ASIGNATURA - SRA']) assert.ok(html.includes(text))
+  assert.ok(!html.includes('Bearer jwt'))
+})
+check('el menú ofrece importar horarios debajo de importar usuarios', () => {
+  const html = renderToStaticMarkup(<DashboardPage route="/dashboard/horarios" session={{ token: 'jwt', user: { nombre: 'Admin' } }} />)
+  assert.ok(html.includes('href="#/dashboard/horarios"'))
+  assert.ok(html.indexOf('href="#/dashboard/usuarios"') < html.indexOf('href="#/dashboard/horarios"'))
+  assert.ok(html.includes('<span>Importar horarios</span>'))
 })
 check('el panel enlaza la sección de asignaciones', () => {
   const html = renderToStaticMarkup(<DashboardPage route="/dashboard/asignaciones" session={{ token: 'jwt', user: { nombre: 'Admin', sedeId: 2 } }} />)

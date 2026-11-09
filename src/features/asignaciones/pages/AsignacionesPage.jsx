@@ -72,10 +72,6 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
   const [devoluciones, setDevoluciones] = useState(() => new Map())
   const [guardando, setGuardando] = useState(false)
   const [guardarError, setGuardarError] = useState('')
-  // lady vidal - HU-06: si la sede del usuario no tiene espacios se consulta
-  // la sede por defecto del backend (Palmira) para no dejar la vista vacía.
-  const [sedeEfectiva, setSedeEfectiva] = useState(() => sedeId ?? null)
-  const [avisoSede, setAvisoSede] = useState('')
   // Se conserva la referencia para no repetir la consulta si el padre cambia.
   const logoutRef = useRef(onLogout)
 
@@ -103,7 +99,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
   useEffect(() => {
     let cancelled = false
 
-    listarBloquesHorario(sedeEfectiva, token)
+    listarBloquesHorario(sedeId, token)
       .then((data) => {
         if (!cancelled) {
           setBloques(Array.isArray(data) ? data : [])
@@ -111,8 +107,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
         }
       })
       .catch((failure) => {
-        // Un 404 aquí puede significar que la sede no tiene bloques; el
-        // horario se encarga de caer a la sede por defecto si hace falta.
+        // Un 404 aquí significa que la sede no tiene bloques registrados.
         if (!cancelled && failure.status !== 404) {
           setCatalogError('No se pudieron cargar todos los filtros.')
         }
@@ -121,7 +116,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
     return () => {
       cancelled = true
     }
-  }, [sedeEfectiva, token])
+  }, [sedeId, token])
 
   // Los pisos dependen del bloque elegido.
   useEffect(() => {
@@ -154,7 +149,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
 
       try {
         const data = await obtenerHorario(
-          { sedeId: sedeEfectiva, ...filtros },
+          { sedeId, ...filtros },
           token,
           controller.signal,
         )
@@ -173,16 +168,6 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
 
         if (failure.status === 401) {
           logoutRef.current?.()
-          return
-        }
-
-        // lady vidal - HU-06: si la sede del administrador no tiene espacios,
-        // se reintenta con la sede por defecto del backend y se avisa.
-        if (failure.status === 404 && sedeEfectiva != null) {
-          setAvisoSede(
-            'Tu sede no tiene espacios registrados. Se muestra la sede por defecto del sistema.',
-          )
-          setSedeEfectiva(null)
           return
         }
 
@@ -216,7 +201,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
       clearTimeout(timer)
       controller.abort()
     }
-  }, [token, sedeEfectiva, filtros, reload])
+  }, [token, sedeId, filtros, reload])
 
   // Las franjas pendientes tienen sus propios filtros y se actualizan aparte
   // del horario de espacios.
@@ -441,14 +426,6 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
           <button
             type="button"
             className="asignaciones__boton"
-            disabled
-            title="Disponible próximamente"
-          >
-            Importar
-          </button>
-          <button
-            type="button"
-            className="asignaciones__boton"
             disabled={!hayCambios || guardando}
             onClick={guardarCambios}
           >
@@ -479,12 +456,6 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
         />
 
         <div className="asignaciones__contenido">
-          {avisoSede && (
-            <p className="asignaciones__aviso" role="status">
-              {avisoSede}
-            </p>
-          )}
-
           <FiltrosHorario
             filtros={filtros}
             tipos={tipos}

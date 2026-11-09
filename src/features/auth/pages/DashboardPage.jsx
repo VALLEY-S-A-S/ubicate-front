@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import UsuariosPage from '../../usuarios/pages/UsuariosPage'
+import ImportarHorariosPage from '../../franjas/pages/ImportarHorariosPage'
 import BloquesPage from '../../espacios/pages/BloquesPage'
 import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
@@ -63,6 +64,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   }
 
   const isUsuarios = route === '/dashboard/usuarios'
+  const isHorarios = route === '/dashboard/horarios'
   const isEspacios = route === '/dashboard/espacios'
   const isBloques = route === '/dashboard/espacios/bloques'
   const isGestionEspacios = route === '/dashboard/espacios/espacios'
@@ -78,6 +80,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
           <h2 className="sidebar-header">Menú</h2>
           <nav className="sidebar-nav">
             <a href="#/dashboard/usuarios" className={`sidebar-link${isUsuarios ? ' active' : ''}`}>Importar usuarios</a>
+            <a href="#/dashboard/horarios" className={`sidebar-link${isHorarios ? ' active' : ''}`}>Importar horarios</a>
             <a
               href="#/dashboard/espacios"
               className={`sidebar-link${route?.startsWith('/dashboard/espacios') ? ' active' : ''}`}
@@ -105,7 +108,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
           <header className="dashboard-header">
             <div className="breadcrumb">
               Administración
-              {isUsuarios ? <>{' > '}<span>Importar usuarios</span></> : isAsignaciones ? (
+              {isUsuarios ? <>{' > '}<span>Importar usuarios</span></> : isHorarios ? (
+                <>
+                  {' > '}
+                  <span>Importar horarios</span>
+                </>
+              ) : isAsignaciones ? (
                 <>
                   {' > '}
                   <span>Asignaciones</span>
@@ -171,7 +179,11 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
 
           {/* Área de contenido */}
           <div className="dashboard-main">
-            {isUsuarios ? <UsuariosPage token={session?.token} /> : isAsignaciones ? (
+            {isUsuarios ? (
+              <UsuariosPage token={session?.token} />
+            ) : isHorarios ? (
+              <ImportarHorariosPage token={session?.token} onLogout={onLogout} />
+            ) : isAsignaciones ? (
               <AsignacionesPage
                 token={session?.token}
                 sedeId={session?.user?.sedeId}
