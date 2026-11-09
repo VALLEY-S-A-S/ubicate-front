@@ -426,14 +426,6 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
           <button
             type="button"
             className="asignaciones__boton"
-            disabled
-            title="Disponible próximamente"
-          >
-            Importar
-          </button>
-          <button
-            type="button"
-            className="asignaciones__boton"
             disabled={!hayCambios || guardando}
             onClick={guardarCambios}
           >
