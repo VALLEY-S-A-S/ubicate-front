@@ -16,6 +16,7 @@ import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
 import CatalogoPage from '../../espacios/pages/CatalogoPage'
+import ReportesPage from '../../reportes/pages/ReportesPage.jsx'
 
 const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -71,6 +72,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   // lady vidal - HU-06: sección de asignaciones con filtros y horario.
   const isAsignaciones = route === '/dashboard/asignaciones'
   const isCatalogo = route === '/dashboard/catalogo'
+  const isReportes = route === '/dashboard/reportes'
 
   return (
     <main className="dashboard-page">
@@ -99,6 +101,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             >
               Catálogo
             </a>
+            <a
+              href="#/dashboard/reportes"
+              className={`sidebar-link${isReportes ? ' active' : ''}`}
+            >
+              Reportes
+            </a>
           </nav>
         </aside>
 
@@ -118,7 +126,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                   {' > '}
                   <span>Asignaciones</span>
                 </>
-              ) : isCatalogo ? <>{' > '}<span>Catálogo</span></> : isBloques ? (
+              ) : isCatalogo ? <>{' > '}<span>Catálogo</span></> : isReportes ? (
+                <>
+                  {' > '}
+                  <span>Reportes</span>
+                </>
+              ) : isBloques ? (
                 <>
                   {' > '}
                   Administrar espacios
@@ -191,6 +204,8 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
               />
             ) : isCatalogo ? (
               <CatalogoPage token={session?.token} />
+            ) : isReportes ? (
+              <ReportesPage token={session?.token} sedeId={session?.user?.sedeId} />
             ) : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (
