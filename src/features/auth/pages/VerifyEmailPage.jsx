@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import RegistrationLayout from '../components/RegistrationLayout'
+import VerificationLayout from '../components/VerificationLayout'
 import { isInstitutionalEmail } from '../validation/registration.js'
 import { resendVerification } from '../services/authApi'
 import {
@@ -60,24 +60,24 @@ export default function VerifyEmailPage({ pending, onEmail }) {
   }
 
   if (!pending || changing) {
-    return <RegistrationLayout title="Solicita un enlace" subtitle="Escribe el correo institucional asociado a tu cuenta.">
-      <form className="registration-form" onSubmit={event => {
+    return <VerificationLayout title="Solicita un enlace" subtitle="Escribe el correo institucional asociado a tu cuenta.">
+      <form className="verification-form" onSubmit={event => {
         event.preventDefault()
         if (!isInstitutionalEmail(email)) { setEmailError('Usa tu correo @correounivalle.edu.co.'); return }
         setChanging(false); onEmail(email)
       }} noValidate>
-        <div className="registration-field"><label htmlFor="resend-email">Correo institucional</label>
+        <div className="verification-field"><label htmlFor="resend-email">Correo institucional</label>
           <input id="resend-email" type="email" maxLength={150} autoComplete="email" value={email} onChange={event => { setEmail(event.target.value); setEmailError('') }} aria-invalid={Boolean(emailError)} aria-describedby={emailError ? 'resend-error' : undefined} required />
-          {emailError && <p id="resend-error" role="alert">{emailError}</p>}
+          {emailError && <p id="resend-error" className="verification-field__error" role="alert">{emailError}</p>}
         </div>
-        <button className="registration-primary" type="submit">Continuar</button>
+        <button className="verification-button" type="submit">Continuar</button>
       </form>
-      <a className="registration-link" href="#/login">Volver al inicio de sesión</a>
-    </RegistrationLayout>
+      <a className="verification-link" href="#/login">Volver al inicio de sesión</a>
+    </VerificationLayout>
   }
 
   return (
-    <RegistrationLayout
+    <VerificationLayout
       title="Revisa tu correo"
       subtitle="Solicita un enlace para esta cuenta:"
     >
@@ -91,18 +91,18 @@ export default function VerifyEmailPage({ pending, onEmail }) {
         correo no deseado.
       </p>
       <div aria-live="polite" role="status">
-        {message && <p className="registration-message">{message}</p>}
+        {message && <p className="verification-status">{message}</p>}
       </div>
       {error && (
         <p
-          className="registration-message registration-message--error"
+          className="verification-status verification-status--error"
           role="alert"
         >
           {error}
         </p>
       )}
       <button
-        className="registration-primary"
+        className="verification-button"
         type="button"
         disabled={loading || seconds > 0}
         onClick={handleResend}
@@ -114,13 +114,13 @@ export default function VerifyEmailPage({ pending, onEmail }) {
             ? `Reenviar en ${seconds}s`
             : 'Reenviar enlace'}
       </button>
-      <a className="registration-link" href="#/login">
+      <a className="verification-link" href="#/login">
         Volver al inicio de sesión
       </a>
-      <button className="registration-link" type="button" onClick={() => { setEmail(pending.email); setChanging(true) }}>Usar otro correo</button>
+      <button className="verification-link" type="button" onClick={() => { setEmail(pending.email); setChanging(true) }}>Usar otro correo</button>
       <p className="verification-hint verification-hint--last">
         Las cuentas no administrativas acceden desde la aplicación móvil. La solicitud no garantiza entrega inmediata.
       </p>
-    </RegistrationLayout>
+    </VerificationLayout>
   )
 }
