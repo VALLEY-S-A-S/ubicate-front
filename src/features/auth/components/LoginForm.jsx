@@ -38,6 +38,25 @@ function UserIcon() {
   )
 }
 
+function LockIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2" />
+      <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
+    </svg>
+  )
+}
+
 function EyeIcon() {
   return (
     <svg
@@ -74,6 +93,26 @@ function EyeOffIcon() {
       <path d="M9.9 5.9A10.6 10.6 0 0 1 12 5.8c6.3 0 9.8 6.2 9.8 6.2a17 17 0 0 1-3.1 3.8" />
       <path d="M6.2 7.5A17.4 17.4 0 0 0 2.2 12s3.5 6.2 9.8 6.2c1.2 0 2.3-.2 3.3-.6" />
       <path d="M10.2 10.2a2.8 2.8 0 0 0 3.6 3.6" />
+    </svg>
+  )
+}
+
+function SignInIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+      <path d="M10 8.5 14 12l-4 3.5" />
+      <path d="M14 12H4" />
     </svg>
   )
 }
@@ -182,7 +221,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
   return (
     <form className="login-form" onSubmit={handleSubmit} noValidate>
       <div className="login-field">
-        <label className="sr-only" htmlFor="correoInstitucional">
+        <label className="login-field__label" htmlFor="correoInstitucional">
           Correo institucional
         </label>
         <div className="login-field__control">
@@ -191,7 +230,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
             className="login-field__input"
             type="email"
             name="correoInstitucional"
-            placeholder="Correo institucional"
+            placeholder="Ingresa tu correo institucional"
             autoComplete="username"
             inputMode="email"
             value={values.correoInstitucional}
@@ -202,7 +241,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
             }
             disabled={isSubmitting}
           />
-          <span className="login-field__icon" aria-hidden="true">
+          <span className="login-field__icon login-field__icon--start" aria-hidden="true">
             <UserIcon />
           </span>
         </div>
@@ -214,7 +253,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
       </div>
 
       <div className="login-field">
-        <label className="sr-only" htmlFor="contrasenia">
+        <label className="login-field__label" htmlFor="contrasenia">
           Contraseña
         </label>
         <div className="login-field__control">
@@ -223,7 +262,7 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
             className="login-field__input"
             type={showPassword ? 'text' : 'password'}
             name="contrasenia"
-            placeholder="Contraseña"
+            placeholder="Ingresa tu contraseña"
             autoComplete="current-password"
             value={values.contrasenia}
             onChange={handleChange}
@@ -233,9 +272,12 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
             }
             disabled={isSubmitting}
           />
+          <span className="login-field__icon login-field__icon--start" aria-hidden="true">
+            <LockIcon />
+          </span>
           <button
             type="button"
-            className="login-field__icon"
+            className="login-field__icon login-field__icon--end"
             onClick={() => setShowPassword((current) => !current)}
             aria-label={
               showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
@@ -277,7 +319,10 @@ function LoginForm({ onSuccess, onVerificationRequired }) {
             Ingresando...
           </>
         ) : (
-          'Iniciar sesión'
+          <>
+            <SignInIcon />
+            Iniciar sesión
+          </>
         )}
       </button>
     </form>
