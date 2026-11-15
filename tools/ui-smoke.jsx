@@ -5,6 +5,7 @@ import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/Acti
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
 import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
 import ImportarHorariosPage from '../src/features/franjas/pages/ImportarHorariosPage.jsx'
+import VerifyEmailPage from '../src/features/auth/pages/VerifyEmailPage.jsx'
 import { clearSession, saveSession } from '../src/features/auth/services/session.js'
 
 const storage = new Map()
@@ -69,6 +70,16 @@ check('el panel enlaza la sección de asignaciones', () => {
   const html = renderToStaticMarkup(<DashboardPage route="/dashboard/asignaciones" session={{ token: 'jwt', user: { nombre: 'Admin', sedeId: 2 } }} />)
   assert.ok(html.includes('href="#/dashboard/asignaciones"'))
   assert.ok(html.includes('Franjas'))
+})
+check('solicitud de enlace usa el layout de verificación con el formulario de correo', () => {
+  const html = renderToStaticMarkup(<VerifyEmailPage pending={null} onEmail={() => {}} />)
+  for (const text of ['verification-page', 'verification-card', 'Solicita un enlace', 'Correo institucional', 'Continuar', 'Volver al inicio de sesión']) assert.ok(html.includes(text))
+  assert.ok(!html.includes('registration-shell'))
+})
+check('reenvío de enlace conserva correo, estado y acciones de la verificación', () => {
+  const html = renderToStaticMarkup(<VerifyEmailPage pending={{ email: 'cuenta@correounivalle.edu.co' }} onEmail={() => {}} />)
+  for (const text of ['verification-page', 'Revisa tu correo', 'cuenta@correounivalle.edu.co', 'Reenviar enlace', 'Usar otro correo', 'El enlace vence en 24 horas']) assert.ok(html.includes(text))
+  assert.ok(!html.includes('Bearer'))
 })
 clearSession()
 console.log(`${count} comprobaciones de componentes aprobadas.`)

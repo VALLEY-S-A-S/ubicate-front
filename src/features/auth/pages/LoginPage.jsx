@@ -6,7 +6,8 @@
  * institucionales siguiendo el prototipo visual.
  */
 
-import logoUbicate from '../../../assets/logo-ubicate.svg'
+import logoUbicate from '../../../assets/logoubicatetrazado.png'
+import imagenInicio from '../../../assets/imageninicio.webp'
 import LoginForm from '../components/LoginForm'
 import '../styles/auth.css'
 
@@ -33,27 +34,31 @@ function InfoIcon() {
 function LoginPage({ onSuccess, onVerificationRequired, notice, setup, onRetrySetup }) {
   return (
     <main className="login-page">
-      <div className="login-page__content">
-        <header className="login-brand">
+      <section className="login-visual" aria-label="Ubícate, gestión de espacios universitarios">
+        <img className="login-visual__image" src={imagenInicio} alt="" />
+        <span className="login-visual__tint" aria-hidden="true" />
+        <div className="login-visual__brand">
           <img
+            className="login-visual__logo"
             src={logoUbicate}
-            className="login-brand__logo"
-            width="78"
-            height="78"
-            alt="Logo de Ubícate"
+            alt="Logotipo de Ubícate"
           />
-          <h1 className="login-brand__name">Ubícate</h1>
-        </header>
+          <p className="login-visual__name">Ubicate</p>
+          <span className="login-visual__divider" aria-hidden="true" />
+          <p className="login-visual__tagline">Gestión de espacios universitarios</p>
+        </div>
+      </section>
 
-        <section className="login-card" aria-labelledby="login-title">
+      <section className="login-panel">
+        <div className="login-card" aria-labelledby="login-title">
           <h2 id="login-title" className="login-card__title" tabIndex={-1}>
-            Bienvenido
+            Iniciar sesión
           </h2>
           <p className="login-card__subtitle">
             Inicia sesión con tu correo institucional
           </p>
 
-          {notice && <p role="status" className="login-card__subtitle">{notice}</p>}
+          {notice && <p role="status" className="login-card__notice">{notice}</p>}
           <LoginForm
             onSuccess={onSuccess}
             onVerificationRequired={onVerificationRequired}
@@ -65,12 +70,12 @@ function LoginPage({ onSuccess, onVerificationRequired, notice, setup, onRetrySe
           {setup?.state === 'ready' && !setup.requiresSetup && <p className="login-card__note">Las cuentas nuevas las crea el administrador de tu institución.</p>}
           <a className="login-register-link" href="#/verificar-correo">¿Necesitas un enlace de activación?</a>
 
-          <p className="login-card__note">
+          <p className="login-card__note login-card__note--centered">
             <InfoIcon />
             <span>Solo se permiten cuentas institucionales</span>
           </p>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   )
 }
