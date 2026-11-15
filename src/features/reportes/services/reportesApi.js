@@ -33,6 +33,10 @@ export function obtenerReporte(id, token, signal) {
   return apiRequest(`/api/reportes/${id}`, { token, signal })
 }
 
+export function completarReporte(id, token, signal) {
+  return apiRequest(`/api/reportes/${id}/completar`, { method: 'PATCH', token, signal })
+}
+
 export function obtenerEvidencia(id, token, signal) {
   return apiRequest(`/api/reportes/${id}/evidencia`, { token, signal, responseType: 'blob' })
 }

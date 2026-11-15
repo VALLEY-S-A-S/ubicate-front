@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ReporteIcon } from './reportesIconos.jsx'
 import {
   claseEstado,
@@ -17,10 +17,15 @@ export default function ReporteDetalleModal({
   evidenciaUrl,
   evidenciaCargando,
   evidenciaError,
+  puedeCompletar = false,
+  completando = false,
+  completarError = '',
+  onCompletar,
   onCerrar,
   onReintentar,
 }) {
   const cerrarRef = useRef(null)
+  const [confirmando, setConfirmando] = useState(false)
 
   useEffect(() => {
     const anterior = document.body.style.overflow
@@ -39,6 +44,9 @@ export default function ReporteDetalleModal({
   if (!reporte) return null
 
   const visual = estiloAnomalia(reporte.tipoAnomaliaNombre)
+  const puedeCerrarReporte = Boolean(
+    puedeCompletar && onCompletar && claseEstado(reporte.estado) === 'pendiente' && !cargando && !error,
+  )
 
   return (
     <div
@@ -198,16 +206,59 @@ export default function ReporteDetalleModal({
 
               <div className="reportes-modal__aviso">
                 <ReporteIcon nombre="info" size={18} />
-                <p>Vista de solo lectura. La atención de reportes se realiza desde la aplicación móvil.</p>
+                <p>
+                  {puedeCerrarReporte
+                    ? 'Puedes marcar este reporte como completado desde esta vista o desde la aplicación móvil.'
+                    : 'Vista de solo lectura. La atención de reportes se realiza desde la aplicación móvil.'}
+                </p>
               </div>
             </>
           )}
         </div>
 
         <footer className="reportes-modal__pie">
-          <button type="button" className="reportes-boton reportes-boton--primario" onClick={onCerrar}>
-            Cerrar
-          </button>
+          {completarError && (
+            <p className="reportes-modal__error" role="alert">
+              {completarError}
+            </p>
+          )}
+          {puedeCerrarReporte && confirmando ? (
+            <>
+              <span className="reportes-modal__pregunta">¿Confirmas que el reporte fue atendido?</span>
+              <button
+                type="button"
+                className="reportes-boton reportes-boton--secundario"
+                onClick={() => setConfirmando(false)}
+                disabled={completando}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="reportes-boton reportes-boton--primario"
+                onClick={onCompletar}
+                disabled={completando}
+              >
+                {completando ? 'Completando...' : 'Sí, completar'}
+              </button>
+            </>
+          ) : (
+            <>
+              {puedeCerrarReporte && (
+                <button
+                  type="button"
+                  className="reportes-boton reportes-boton--secundario"
+                  onClick={() => setConfirmando(true)}
+                  disabled={completando}
+                >
+                  Completar reporte
+                </button>
+              )}
+              <button type="button" className="reportes-boton reportes-boton--primario" onClick={onCerrar}>
+                Cerrar
+              </button>
+            </>
+          )}
         </footer>
       </div>
     </div>

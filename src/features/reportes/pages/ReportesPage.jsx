@@ -3,7 +3,9 @@ import ReporteDetalleModal from '../components/ReporteDetalleModal.jsx'
 import ReportesFiltros from '../components/ReportesFiltros.jsx'
 import ReportesTabla from '../components/ReportesTabla.jsx'
 import { ReporteIcon } from '../components/reportesIconos.jsx'
+import { isAdminRole } from '../../auth/services/authApi.js'
 import {
+  completarReporte,
   listarBloques,
   listarEspacios,
   listarPisos,
@@ -18,7 +20,8 @@ import '../styles/reportes.css'
 const TAMANO = 20
 const PAGINA_VACIA = { content: [], totalElements: 0, totalPages: 0, page: 0 }
 
-export default function ReportesPage({ token, sedeId }) {
+export default function ReportesPage({ token, sedeId, rol }) {
+  const puedeCompletar = isAdminRole(rol)
   const [filtros, setFiltros] = useState({ ...FILTROS_VACIOS })
   const [aplicados, setAplicados] = useState({ ...FILTROS_VACIOS })
   const [pagina, setPagina] = useState(0)
@@ -36,6 +39,8 @@ export default function ReportesPage({ token, sedeId }) {
   const [detalle, setDetalle] = useState(null)
   const [detalleCargando, setDetalleCargando] = useState(false)
   const [detalleError, setDetalleError] = useState('')
+  const [completando, setCompletando] = useState(false)
+  const [completarError, setCompletarError] = useState('')
   const [evidenciaUrl, setEvidenciaUrl] = useState(null)
   const [evidenciaCargando, setEvidenciaCargando] = useState(false)
   const [evidenciaError, setEvidenciaError] = useState('')
@@ -163,6 +168,7 @@ export default function ReportesPage({ token, sedeId }) {
     setDetalle(reporte)
     setDetalleCargando(true)
     setDetalleError('')
+    setCompletarError('')
     setEvidenciaError('')
     setEvidenciaCargando(Boolean(reporte?.tieneEvidencia))
     const controller = new AbortController()
@@ -193,9 +199,32 @@ export default function ReportesPage({ token, sedeId }) {
     setDetalle(null)
     setDetalleCargando(false)
     setDetalleError('')
+    setCompletarError('')
     setEvidenciaCargando(false)
     setEvidenciaError('')
   }, [liberarEvidencia])
+
+  const detalleId = detalle?.id
+  const completarDetalle = useCallback(async () => {
+    if (!detalleId || completando) return
+    setCompletando(true)
+    setCompletarError('')
+    try {
+      const actualizado = await completarReporte(detalleId, token)
+      setDatos((previos) => ({
+        ...previos,
+        content: previos.content.map((reporte) =>
+          reporte.id === actualizado.id ? { ...reporte, ...actualizado } : reporte,
+        ),
+      }))
+      setIntento((valor) => valor + 1)
+      await abrirDetalle(actualizado)
+    } catch (fallo) {
+      if (fallo.name !== 'AbortError') setCompletarError(fallo.message || 'No se pudo completar el reporte.')
+    } finally {
+      setCompletando(false)
+    }
+  }, [abrirDetalle, completando, detalleId, token])
 
   function buscar() {
     setAplicados({ ...filtros })
@@ -218,11 +247,14 @@ export default function ReportesPage({ token, sedeId }) {
       <header className="reportes-cabecera">
         <div>
           <h2>Gestión de reportes</h2>
-          <p>Consulta el historial de anomalías de la sede, filtra por salón, bloque, piso, persona o fecha y revisa la evidencia adjunta.</p>
+          <p>
+            Consulta el historial de anomalías de la sede, filtra por salón, bloque, piso, persona o fecha y revisa la
+            evidencia adjunta.{puedeCompletar ? ' También puedes marcar reportes pendientes como completados.' : ''}
+          </p>
         </div>
         <span className="reportes-cabecera__solo-lectura">
           <ReporteIcon nombre="info" size={16} />
-          Solo lectura
+          {puedeCompletar ? 'Historial y atención' : 'Solo lectura'}
         </span>
       </header>
 
@@ -311,6 +343,10 @@ export default function ReportesPage({ token, sedeId }) {
           evidenciaUrl={evidenciaUrl}
           evidenciaCargando={evidenciaCargando}
           evidenciaError={evidenciaError}
+          puedeCompletar={puedeCompletar}
+          completando={completando}
+          completarError={completarError}
+          onCompletar={completarDetalle}
           onCerrar={cerrarDetalle}
           onReintentar={() => abrirDetalle(detalle)}
         />

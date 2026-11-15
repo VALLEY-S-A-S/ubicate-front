@@ -205,7 +205,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             ) : isCatalogo ? (
               <CatalogoPage token={session?.token} />
             ) : isReportes ? (
-              <ReportesPage token={session?.token} sedeId={session?.user?.sedeId} />
+              <ReportesPage token={session?.token} sedeId={session?.user?.sedeId} rol={session?.user?.rol} />
             ) : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (

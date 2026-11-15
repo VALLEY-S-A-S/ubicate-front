@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import App from '../src/App.jsx'
 import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/ActivatePage.jsx'
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
+import ReporteDetalleModal from '../src/features/reportes/components/ReporteDetalleModal.jsx'
 import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
 import ImportarHorariosPage from '../src/features/franjas/pages/ImportarHorariosPage.jsx'
 import VerifyEmailPage from '../src/features/auth/pages/VerifyEmailPage.jsx'
@@ -80,6 +81,36 @@ check('reenvío de enlace conserva correo, estado y acciones de la verificación
   const html = renderToStaticMarkup(<VerifyEmailPage pending={{ email: 'cuenta@correounivalle.edu.co' }} onEmail={() => {}} />)
   for (const text of ['verification-page', 'Revisa tu correo', 'cuenta@correounivalle.edu.co', 'Reenviar enlace', 'Usar otro correo', 'El enlace vence en 24 horas']) assert.ok(html.includes(text))
   assert.ok(!html.includes('Bearer'))
+})
+const reportePendiente = {
+  id: 9,
+  tipoAnomaliaNombre: 'FALTA DE ASEO',
+  estado: 'PENDIENTE',
+  creadoEn: '2026-11-15T10:00:00',
+  tieneEvidencia: false,
+}
+const propsDetalle = {
+  cargando: false,
+  error: '',
+  evidenciaUrl: null,
+  evidenciaCargando: false,
+  evidenciaError: '',
+  puedeCompletar: true,
+  completando: false,
+  completarError: '',
+  onCompletar: () => {},
+  onCerrar: () => {},
+  onReintentar: () => {},
+}
+check('el detalle permite al administrador completar un reporte pendiente', () => {
+  const html = renderToStaticMarkup(<ReporteDetalleModal {...propsDetalle} reporte={reportePendiente} />)
+  assert.ok(html.includes('Completar reporte'))
+})
+check('un reporte completado ya no ofrece la acción de completar', () => {
+  const html = renderToStaticMarkup(
+    <ReporteDetalleModal {...propsDetalle} reporte={{ ...reportePendiente, id: 10, estado: 'COMPLETADO' }} />,
+  )
+  assert.ok(!html.includes('Completar reporte'))
 })
 clearSession()
 console.log(`${count} comprobaciones de componentes aprobadas.`)

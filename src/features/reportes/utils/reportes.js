@@ -2,8 +2,8 @@ export const ROLES_REPORTANTE = [
   { value: 'ESTUDIANTE', label: 'Estudiante' },
   { value: 'DOCENTE', label: 'Docente' },
   { value: 'TECNICO', label: 'Técnico' },
-  { value: 'OPERARIO', label: 'Operario' },
-  { value: 'PERSONAL', label: 'Servicios generales' },
+  { value: 'LOGISTICA', label: 'Logística' },
+  { value: 'PERSONAL', label: 'Personal' },
   { value: 'ADMIN', label: 'Administrador' },
 ]
 
@@ -13,8 +13,8 @@ const ETIQUETAS_ROL = {
   ESTUDIANTE: 'Estudiante',
   DOCENTE: 'Docente',
   TECNICO: 'Técnico',
-  OPERARIO: 'Operario',
-  PERSONAL: 'Servicios generales',
+  LOGISTICA: 'Logística',
+  PERSONAL: 'Personal',
 }
 
 const ESTILOS_ANOMALIA = [
