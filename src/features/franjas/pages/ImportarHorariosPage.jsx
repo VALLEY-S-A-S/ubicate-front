@@ -75,6 +75,7 @@ export default function ImportarHorariosPage({ token }) {
     ['Con salón', 'conSalon'],
     ['Sin salón (pendientes)', 'sinSalon'],
     ['Virtuales', 'virtuales'],
+    ['Filas omitidas', 'filasOmitidas'],
   ]
 
   return (
@@ -97,16 +98,17 @@ export default function ImportarHorariosPage({ token }) {
           <p>
             Una hoja con las columnas{' '}
             <strong>
-              SEDE, PLAN, JOR, SEM, CODIGO, CATALOGO ASIGNATURA - SRA, PAT, CUPO,
-              SALA SIST, DOCENTE, DIA, INICIO, FINAL, FRN, SALON
+              SEDE, PLAN, JOR, SEM, CODIGO, GR, CATALOGO ASIGNATURA - SRA, PAT,
+              CUPO, SALA SIST, DOCENTE, DIA, INICIO, FINAL, FRN, SALON, LUGAR
             </strong>
             . Máximo 10.000 filas y 5 MiB.
           </p>
           <p>
             Jornada: DIU o NOC. Día: LUN a DOM. Horas en formato 12h (ej.
-            2:00:00 PM). Franja: AM, PM o XC. PAT y SALA SIST: SI o NO. La
-            importación es atómica: si una fila tiene errores no se carga ningún
-            horario.
+            2:00:00 PM). Franja: AM, PM o XC. PAT y SALA SIST: SI o NO. GR es el
+            número del grupo (50, 51…) y separa grupos de la misma asignatura.
+            LUGAR es la ubicación de referencia del salón. La importación es
+            atómica: si una fila tiene errores no se carga ningún horario.
           </p>
           <button
             className="horarios-button horarios-button--secondary"
@@ -135,7 +137,9 @@ export default function ImportarHorariosPage({ token }) {
             />
             <p>
               Revisa los datos antes de enviarlos. Necesitas un periodo académico
-              activo, los docentes ya creados y la sede registrada.
+              activo, la sede registrada y un usuario DOCENTE por cada nombre de
+              la columna DOCENTE. Las filas cuyo docente es un valor de error de
+              Excel (#N/D) se omiten y se cuentan en el resultado.
             </p>
             <button
               className="horarios-button"
@@ -165,6 +169,22 @@ export default function ImportarHorariosPage({ token }) {
             {resultado.sinSalon ?? 0} franja(s) sin salón quedaron pendientes de
             asignar en el panel de asignaciones.
           </p>
+          {(resultado.detalleFilasOmitidas ?? []).length > 0 && (
+            <p>
+              Filas omitidas porque no pueden formar una clase (sin docente o con
+              horario incoherente):{' '}
+              {resultado.detalleFilasOmitidas.join(', ')}. Corrige esos renglones
+              y vuelve a importar para incluirlos.
+            </p>
+          )}
+          {(resultado.detalleColisiones ?? []).length > 0 && (
+            <p>
+              Clases cargadas sin salón porque el libro ya asignaba esa aula en
+              ese día y horario (filas{' '}
+              {resultado.detalleColisiones.join(', ')}). Resuélvelas en el panel
+              de asignaciones.
+            </p>
+          )}
         </div>
       )}
 
