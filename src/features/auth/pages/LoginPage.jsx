@@ -6,8 +6,7 @@
  * institucionales siguiendo el prototipo visual.
  */
 
-import logoUbicate from '../../../assets/logoubicatetrazado.png'
-import imagenInicio from '../../../assets/imageninicio.webp'
+import AuthVisualPanel from '../components/AuthVisualPanel'
 import LoginForm from '../components/LoginForm'
 import '../styles/auth.css'
 
@@ -34,20 +33,7 @@ function InfoIcon() {
 function LoginPage({ onSuccess, onVerificationRequired, notice, setup, onRetrySetup }) {
   return (
     <main className="login-page">
-      <section className="login-visual" aria-label="Ubícate, gestión de espacios universitarios">
-        <img className="login-visual__image" src={imagenInicio} alt="" />
-        <span className="login-visual__tint" aria-hidden="true" />
-        <div className="login-visual__brand">
-          <img
-            className="login-visual__logo"
-            src={logoUbicate}
-            alt="Logotipo de Ubícate"
-          />
-          <p className="login-visual__name">Ubicate</p>
-          <span className="login-visual__divider" aria-hidden="true" />
-          <p className="login-visual__tagline">Gestión de espacios universitarios</p>
-        </div>
-      </section>
+      <AuthVisualPanel />
 
       <section className="login-panel">
         <div className="login-card" aria-labelledby="login-title">
