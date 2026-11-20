@@ -14,81 +14,6 @@
   color: var(--color-text);
 }
 
-.login-visual {
-  position: relative;
-  min-height: 100svh;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.login-visual__image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.login-visual__tint {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(155deg, #cf262c 0%, #a11c1f 55%, #741013 100%);
-  mix-blend-mode: multiply;
-}
-
-.login-visual__tint::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(174, 26, 30, 0.3);
-}
-
-.login-visual__brand {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 40px 32px;
-  text-align: center;
-  color: #fff;
-}
-
-.login-visual__logo {
-  width: clamp(120px, 42%, 190px);
-  height: auto;
-  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.35));
-}
-
-.login-visual__name {
-  margin: 0;
-  font-size: clamp(30px, 3.4vw, 44px);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 6px 18px rgba(48, 4, 6, 0.45);
-}
-
-.login-visual__divider {
-  width: 72px;
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.75);
-}
-
-.login-visual__tagline {
-  max-width: 320px;
-  margin: 0;
-  font-size: clamp(14px, 1.4vw, 17px);
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 4px 14px rgba(48, 4, 6, 0.4);
-}
-
 .login-panel {
   position: relative;
   z-index: 1;
@@ -474,31 +399,6 @@ button.login-field__icon:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .login-visual {
-    min-height: 230px;
-  }
-
-  .login-visual__brand {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: center;
-    gap: 10px 16px;
-    padding: 26px 20px;
-  }
-
-  .login-visual__logo {
-    width: 74px;
-  }
-
-  .login-visual__name {
-    font-size: 30px;
-  }
-
-  .login-visual__divider,
-  .login-visual__tagline {
-    display: none;
-  }
-
   .login-panel {
     padding: 32px 18px 44px;
   }
@@ -521,18 +421,6 @@ button.login-field__icon:focus-visible {
 }
 
 @media (max-width: 480px) {
-  .login-visual {
-    min-height: 190px;
-  }
-
-  .login-visual__logo {
-    width: 62px;
-  }
-
-  .login-visual__name {
-    font-size: 26px;
-  }
-
   .login-card {
     padding: 24px 18px 22px;
   }
