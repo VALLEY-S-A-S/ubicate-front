@@ -53,7 +53,7 @@ check('correo verificado se presenta en campo de solo lectura', () => {
 })
 check('módulo de asignaciones muestra filtros y estructura del horario', () => {
   const html = renderToStaticMarkup(<AsignacionesPage token="jwt" sedeId={2} />)
-  for (const text of ['Asignaciones', 'Franjas', 'Buscar por nombre', 'Tipo de espacio', 'Bloque', 'Piso', 'Cargando horario…']) assert.ok(html.includes(text))
+  for (const text of ['Asignaciones', 'Franjas', 'Pendientes', 'Asignadas', 'Inicio', 'Fin', 'Buscar por nombre', 'Tipo de espacio', 'Bloque', 'Piso', 'Cargando horario…']) assert.ok(html.includes(text))
   assert.ok(!html.includes('Bearer jwt'))
 })
 check('módulo de horarios muestra plantilla, carga y conteos', () => {

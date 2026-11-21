@@ -243,6 +243,80 @@ export function franjaDesdeOcupacion(ocupacion, dias = []) {
   }
 }
 
+function normalizarTexto(valor) {
+  return String(valor ?? '').trim().toLowerCase()
+}
+
+// Lista plana de las asignaciones del horario para la pestaña "Asignadas".
+export function listaAsignaciones(horario) {
+  const lista = []
+
+  for (const espacio of horario?.espacios ?? []) {
+    for (const ocupacion of espacio.ocupaciones ?? []) {
+      lista.push({ espacio, ocupacion })
+    }
+  }
+
+  return lista.sort((a, b) => {
+    const dia = Number(a.ocupacion.diaSemana) - Number(b.ocupacion.diaSemana)
+    if (dia !== 0) return dia
+    const hora = String(a.ocupacion.horaInicio).localeCompare(String(b.ocupacion.horaInicio))
+    if (hora !== 0) return hora
+    return String(a.espacio.nombre ?? '').localeCompare(String(b.espacio.nombre ?? ''), 'es')
+  })
+}
+
+// Filtra las asignaciones ya existentes con los mismos criterios del panel.
+export function filtrarAsignaciones(lista = [], filtros = {}) {
+  const docente = normalizarTexto(filtros.docente)
+  const asignatura = normalizarTexto(filtros.asignatura)
+  const grupo = normalizarTexto(filtros.grupo)
+  const programa = normalizarTexto(filtros.programa)
+  const diaSemana = String(filtros.diaSemana ?? '').trim()
+  const horaInicio = minutosDeHora(filtros.horaInicio)
+  const horaFin = minutosDeHora(filtros.horaFin)
+
+  return lista.filter(({ ocupacion }) => {
+    if (docente && !normalizarTexto(ocupacion.docenteNombre).includes(docente)) return false
+    if (asignatura) {
+      const texto = normalizarTexto(ocupacion.titulo)
+      const codigo = normalizarTexto(ocupacion.asignaturaCodigo)
+      if (!texto.includes(asignatura) && !codigo.includes(asignatura)) return false
+    }
+    if (grupo && !normalizarTexto(ocupacion.grupoCodigo).includes(grupo)) return false
+    if (programa && !normalizarTexto(ocupacion.programaNombre).includes(programa)) return false
+    if (diaSemana && Number(ocupacion.diaSemana) !== Number(diaSemana)) return false
+
+    const inicio = minutosDeHora(ocupacion.horaInicio)
+    const fin = minutosDeHora(ocupacion.horaFin)
+    if (horaInicio != null && fin != null && fin <= horaInicio) return false
+    if (horaFin != null && inicio != null && inicio >= horaFin) return false
+
+    return true
+  })
+}
+
+// Espacios visibles donde la franja puede ubicarse, sin repetir el actual.
+export function espaciosDisponibles(horario, franja, espacioActualId) {
+  if (!franja) return []
+
+  return (horario?.espacios ?? [])
+    .filter((espacio) => Number(espacio.id) !== Number(espacioActualId))
+    .filter((espacio) =>
+      puedeAsignarFranja(espacio, franja, franja.diaSemana, horario?.franjas ?? []),
+    )
+    .sort((a, b) => {
+      const bloque = String(a.bloqueNombre ?? '').localeCompare(
+        String(b.bloqueNombre ?? ''),
+        'es',
+      )
+      if (bloque !== 0) return bloque
+      const piso = Number(a.pisoNumero ?? 0) - Number(b.pisoNumero ?? 0)
+      if (piso !== 0) return piso
+      return String(a.nombre ?? '').localeCompare(String(b.nombre ?? ''), 'es')
+    })
+}
+
 // Crea la ocupación temporal que se pinta en el grid antes de guardar.
 export function crearOcupacionLocal(franja, espacioId) {
   return {
