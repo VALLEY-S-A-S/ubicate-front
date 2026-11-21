@@ -22,6 +22,7 @@ export default function HorarioGrid({
   onAsignarFranja,
   onArrastrarAsignacion,
   onDragEnd,
+  onEditarAsignacion,
 }) {
   const dias = Array.isArray(horario?.dias) ? horario.dias : []
   const franjas = Array.isArray(horario?.franjas) ? horario.franjas : []
@@ -105,31 +106,58 @@ export default function HorarioGrid({
                         colSpan={evento.posicion.span}
                         className="horario-tabla__evento-celda"
                       >
-                        <button
-                          type="button"
-                          className="horario-evento"
-                          draggable
-                          style={{ '--evento-color': colorDocente(evento.docenteNombre) }}
-                          onClick={() => onVerEspacio?.(espacio)}
-                          onDragStart={(event) => arrastrarAsignacion(event, evento, espacio)}
-                          onDragEnd={onDragEnd}
-                          title={`${evento.titulo ?? 'Asignación'} · ${
-                            evento.docenteNombre ?? 'Sin docente'
-                          } · ${formatearHora(evento.horaInicio)} - ${formatearHora(
-                            evento.horaFin,
-                          )}. Arrastra al panel de franjas para desasignar.`}
-                        >
-                          <span className="horario-evento__docente">
-                            {evento.docenteNombre ?? 'Sin docente'}
-                          </span>
-                          {evento.titulo && (
-                            <span className="horario-evento__titulo">{evento.titulo}</span>
-                          )}
-                          <span className="horario-evento__hora">
-                            {formatearHora(evento.horaInicio)} -{' '}
-                            {formatearHora(evento.horaFin)}
-                          </span>
-                        </button>
+                        <div className="horario-evento-wrap">
+                          <button
+                            type="button"
+                            className={`horario-evento${
+                              evento.origen === 'local' ? ' horario-evento--pendiente' : ''
+                            }`}
+                            draggable
+                            style={{ '--evento-color': colorDocente(evento.docenteNombre) }}
+                            onClick={() => onVerEspacio?.(espacio)}
+                            onDragStart={(event) => arrastrarAsignacion(event, evento, espacio)}
+                            onDragEnd={onDragEnd}
+                            title={`${evento.titulo ?? 'Asignación'} · ${
+                              evento.docenteNombre ?? 'Sin docente'
+                            } · ${formatearHora(evento.horaInicio)} - ${formatearHora(
+                              evento.horaFin,
+                            )}.${
+                              evento.origen === 'local'
+                                ? ' Cambio sin guardar: presiona Guardar para aplicarlo.'
+                                : ''
+                            } Arrastra al panel de franjas para desasignar.`}
+                          >
+                            <span className="horario-evento__docente">
+                              {evento.docenteNombre ?? 'Sin docente'}
+                            </span>
+                            {evento.titulo && (
+                              <span className="horario-evento__titulo">{evento.titulo}</span>
+                            )}
+                            <span className="horario-evento__hora">
+                              {evento.origen === 'local' && (
+                                <span
+                                  className="horario-evento__pendiente"
+                                  title="Cambio sin guardar"
+                                >
+                                  ●{' '}
+                                </span>
+                              )}
+                              {formatearHora(evento.horaInicio)} -{' '}
+                              {formatearHora(evento.horaFin)}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className="horario-evento__editar"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onEditarAsignacion?.(evento, espacio)
+                            }}
+                            title="Cambiar este evento de espacio"
+                          >
+                            Editar
+                          </button>
+                        </div>
                       </td>
                     )
                     indice += evento.posicion.span
