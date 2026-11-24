@@ -11,6 +11,13 @@
   color: var(--color-text-primary);
 }
 
+.espacios-landing__title {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  color: #1f2937;
+}
+
 .espacios-page__subtitle {
   margin: 0 0 24px;
   font-size: 14px;
@@ -87,9 +94,9 @@ a.espacios-option:hover {
 
 .bloques-page__title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .bloques-add {
@@ -898,7 +905,8 @@ a.espacios-option:hover {
 }
 .gestion-espacios__intro h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
   color: #1f2937;
 }
 .gestion-espacios__intro p {

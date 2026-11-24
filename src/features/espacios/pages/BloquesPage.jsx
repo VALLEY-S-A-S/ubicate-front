@@ -86,7 +86,10 @@ export default function BloquesPage({ token, onLogout }) {
   return (
     <section className="bloques-page">
       <header className="bloques-page__header">
-        <h2 className="bloques-page__title">Gestionar bloques</h2>
+        <div>
+          <p className="page-eyebrow">Infraestructura</p>
+          <h2 className="bloques-page__title">Gestionar bloques</h2>
+        </div>
         {!showForm && (
           <button
             type="button"

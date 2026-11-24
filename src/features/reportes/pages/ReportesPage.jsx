@@ -246,6 +246,7 @@ export default function ReportesPage({ token, sedeId, rol }) {
     <section className="reportes-pagina">
       <header className="reportes-cabecera">
         <div>
+          <p className="page-eyebrow">Seguimiento</p>
           <h2>Gestión de reportes</h2>
           <p>
             Consulta el historial de anomalías de la sede, filtra por salón, bloque, piso, persona o fecha y revisa la

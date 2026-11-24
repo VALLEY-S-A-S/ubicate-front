@@ -536,6 +536,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
     <section className="asignaciones">
       <header className="asignaciones__cabecera">
         <div>
+          <p className="page-eyebrow">Gestión académica</p>
           <h2 className="asignaciones__titulo">Asignaciones</h2>
           <p className="asignaciones__subtitulo">
             Asigna los espacios a los respectivos docentes acorde a los horarios
