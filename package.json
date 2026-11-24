@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "test": "node --test",
+    "preview": "vite preview",
+    "test:ui": "node tools/ui-smoke.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
