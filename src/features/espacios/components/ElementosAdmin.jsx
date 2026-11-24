@@ -22,6 +22,7 @@ export default function ElementosAdmin({ token }) {
   const [guardando, setGuardando] = useState(false)
   const [formError, setFormError] = useState('')
   const [pendingId, setPendingId] = useState(null)
+  const [confirmar, setConfirmar] = useState(null)
 
   function cargar() {
     setStatus('loading')
@@ -98,6 +99,7 @@ export default function ElementosAdmin({ token }) {
       setError('No se pudo cambiar el estado.')
     } finally {
       setPendingId(null)
+      setConfirmar(null)
     }
   }
 
@@ -149,12 +151,14 @@ export default function ElementosAdmin({ token }) {
                     <td><CategoriaBadge nombre={e.categoriaNombre} color={e.categoriaColor} icono={e.categoriaIcono} /></td>
                     <td>{e.activo ? 'Activo' : 'Inactivo'}</td>
                     <td className="inventario__acciones">
-                      <button type="button" className="espacios-action" disabled={pendingId === e.id} onClick={() => abrirEditar(e)}>Editar</button>
+                      {e.activo && (
+                        <button type="button" className="espacios-action" disabled={pendingId === e.id} onClick={() => abrirEditar(e)}>Editar</button>
+                      )}
                       <button
                         type="button"
                         className={`espacios-action${e.activo ? ' espacios-action--danger' : ''}`}
                         disabled={pendingId === e.id}
-                        onClick={() => alternarEstado(e)}
+                        onClick={() => (e.activo ? setConfirmar(e) : alternarEstado(e))}
                       >
                         {e.activo ? 'Desactivar' : 'Activar'}
                       </button>
@@ -221,6 +225,21 @@ export default function ElementosAdmin({ token }) {
           </div>
         )}
       </div>
+
+      {confirmar && (
+        <div className="espacios-modal" role="presentation" onClick={() => setConfirmar(null)}>
+          <div className="espacios-modal__content" role="dialog" aria-modal="true" onClick={(ev) => ev.stopPropagation()}>
+            <h4 className="catalogo-form__title">Desactivar elemento</h4>
+            <p className="catalogo-admin__hint">
+              ¿Seguro que deseas desactivar <strong>{confirmar.nombre}</strong>? Dejará de aparecer en el buscador y no podrá agregarse a más espacios. Podrás reactivarlo después.
+            </p>
+            <div className="espacio-form__actions">
+              <button type="button" className="espacio-btn espacio-btn--cancel" onClick={() => setConfirmar(null)} disabled={pendingId === confirmar.id}>Cancelar</button>
+              <button type="button" className="espacio-btn espacio-btn--primary" onClick={() => alternarEstado(confirmar)} disabled={pendingId === confirmar.id}>Desactivar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

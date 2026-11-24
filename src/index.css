@@ -150,16 +150,20 @@ button {
 }
 
 .sidebar-header {
-  margin: 0 0 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #E5E7EB;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  bottom: 0;
-  position: sticky;
+  margin: -24px -16px 20px;
+  padding: 14px 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--color-brand) 0%, var(--color-brand-strong) 100%);
+  border-radius: 0 0 8px 8px;
+}
+
+.sidebar-logo {
+  display: block;
+  width: 108px;
+  max-width: 80%;
+  height: auto;
 }
 
 .sidebar-nav {
@@ -188,6 +192,21 @@ button {
 .sidebar-link.active {
   background: #FDE8EA;
   color: #B71C2B;
+}
+
+.sidebar-ico {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.page-eyebrow {
+  margin: 0 0 8px !important;
+  color: var(--color-brand) !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .dashboard-content {

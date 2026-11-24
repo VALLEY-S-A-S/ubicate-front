@@ -134,6 +134,10 @@ export default function EspacioInventario({ espacioId, token, onLogout }) {
   async function guardarEdicion(item) {
     const cant = Number(editCantidad)
     if (!Number.isInteger(cant) || cant < 0) return
+    if (item.activo === false && cant > item.cantidad) {
+      setError('El elemento está desactivado; solo puedes reducir o retirar su cantidad.')
+      return
+    }
     setPendingId(item.elementoId)
     setError('')
     try {
@@ -280,8 +284,11 @@ export default function EspacioInventario({ espacioId, token, onLogout }) {
                   const editando = editId === item.elementoId
                   const busy = pendingId === item.elementoId
                   return (
-                    <tr key={item.elementoId}>
-                      <td>{item.nombre}</td>
+                    <tr key={item.elementoId} className={item.activo === false ? 'inventario-row--inactivo' : ''}>
+                      <td>
+                        {item.nombre}
+                        {item.activo === false && <span className="inventario-badge-inactivo">Inactivo</span>}
+                      </td>
                       <td>
                         <CategoriaBadge nombre={item.categoriaNombre} color={item.categoriaColor} icono={item.categoriaIcono} />
                       </td>
@@ -290,6 +297,7 @@ export default function EspacioInventario({ espacioId, token, onLogout }) {
                           <input
                             type="number"
                             min="0"
+                            max={item.activo === false ? item.cantidad : undefined}
                             className="inventario__cantidad"
                             value={editCantidad}
                             onChange={(event) => setEditCantidad(event.target.value)}

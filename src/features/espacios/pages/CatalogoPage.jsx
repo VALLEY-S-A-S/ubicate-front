@@ -9,6 +9,7 @@ export default function CatalogoPage({ token }) {
   return (
     <section className="catalogo-page">
       <header className="gestion-espacios__intro">
+        <p className="page-eyebrow">Inventario</p>
         <h2>Catálogo de inventario</h2>
         <p>Gestiona los elementos y categorías disponibles para el inventario de los espacios.</p>
       </header>
