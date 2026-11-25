@@ -17,6 +17,7 @@ import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
 import CatalogoPage from '../../espacios/pages/CatalogoPage'
 import ReportesPage from '../../reportes/pages/ReportesPage.jsx'
+import AuditoriaPage from '../../auditoria/pages/AuditoriaPage'
 
 const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -73,6 +74,7 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const isAsignaciones = route === '/dashboard/asignaciones'
   const isCatalogo = route === '/dashboard/catalogo'
   const isReportes = route === '/dashboard/reportes'
+  const isAuditoria = route === '/dashboard/auditoria'
 
   const iconUsuarios = (
     <svg className="sidebar-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -91,6 +93,9 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   )
   const iconReportes = (
     <svg className="sidebar-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M8 17v-5M13 17V9M18 17v-8"/></svg>
+  )
+  const iconAuditoria = (
+    <svg className="sidebar-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13a9 9 0 1 0 2.5-6.36L3 8"/><path d="M12 7v5l3 2"/></svg>
   )
 
   return (
@@ -128,6 +133,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             >
               {iconReportes}Reportes
             </a>
+            <a
+              href="#/dashboard/auditoria"
+              className={`sidebar-link${isAuditoria ? ' active' : ''}`}
+            >
+              {iconAuditoria}Auditoría
+            </a>
           </nav>
         </aside>
 
@@ -151,6 +162,11 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                 <>
                   {' > '}
                   <span>Reportes</span>
+                </>
+              ) : isAuditoria ? (
+                <>
+                  {' > '}
+                  <span>Auditoría</span>
                 </>
               ) : isBloques ? (
                 <>
@@ -227,6 +243,8 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
               <CatalogoPage token={session?.token} />
             ) : isReportes ? (
               <ReportesPage token={session?.token} sedeId={session?.user?.sedeId} rol={session?.user?.rol} />
+            ) : isAuditoria ? (
+              <AuditoriaPage token={session?.token} />
             ) : isBloques ? (
               <BloquesPage token={session?.token} onLogout={onLogout} />
             ) : isGestionEspacios ? (

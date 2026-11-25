@@ -176,9 +176,11 @@ export default function ElementosAdmin({ token }) {
 
             {totalPaginas > 1 && (
               <div className="catalogo-paginacion">
-                <button type="button" className="espacios-action" disabled={paginaActual === 0} onClick={() => setPagina(paginaActual - 1)}>Anterior</button>
                 <span>Página {paginaActual + 1} de {totalPaginas}</span>
-                <button type="button" className="espacios-action" disabled={paginaActual >= totalPaginas - 1} onClick={() => setPagina(paginaActual + 1)}>Siguiente</button>
+                <div className="catalogo-paginacion__btns">
+                  <button type="button" className="espacios-action" disabled={paginaActual === 0} onClick={() => setPagina(paginaActual - 1)}>Anterior</button>
+                  <button type="button" className="espacios-action" disabled={paginaActual >= totalPaginas - 1} onClick={() => setPagina(paginaActual + 1)}>Siguiente</button>
+                </div>
               </div>
             )}
           </>
