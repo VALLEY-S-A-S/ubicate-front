@@ -10,6 +10,7 @@ export default function BloquesPage({ token, onLogout }) {
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [selectedId, setSelectedId] = useState(null)
   const [reload, setReload] = useState(0)
 
   useEffect(() => {
@@ -23,6 +24,10 @@ export default function BloquesPage({ token, onLogout }) {
         const data = await listarBloques(token)
         if (cancelled) return
         setBloques(data)
+        // Tras cargar, el detalle muestra el primer bloque si sigue existiendo.
+        setSelectedId((actual) =>
+          data.some((b) => b.id === actual) ? actual : (data[0]?.id ?? null),
+        )
         setStatus('ready')
       } catch (err) {
         if (cancelled) return
@@ -53,12 +58,13 @@ export default function BloquesPage({ token, onLogout }) {
     }
   }, [token, reload])
 
+  const bloqueSeleccionado = bloques.find((b) => b.id === selectedId) ?? null
+
   function handleCreated(nuevoBloque) {
     setBloques((current) =>
-      [...current, nuevoBloque].sort((a, b) =>
-        a.nombre.localeCompare(b.nombre),
-      ),
+      [...current, nuevoBloque].sort((a, b) => a.nombre.localeCompare(b.nombre)),
     )
+    setSelectedId(nuevoBloque.id)
     setEditing(null)
     setShowForm(false)
   }
@@ -69,6 +75,7 @@ export default function BloquesPage({ token, onLogout }) {
         .map((b) => (b.id === bloqueActualizado.id ? bloqueActualizado : b))
         .sort((a, b) => a.nombre.localeCompare(b.nombre)),
     )
+    setSelectedId(bloqueActualizado.id)
     setEditing(null)
     setShowForm(false)
   }
@@ -78,48 +85,19 @@ export default function BloquesPage({ token, onLogout }) {
     setShowForm(true)
   }
 
+  function openCreate() {
+    setEditing(null)
+    setShowForm(true)
+  }
+
   function closeForm() {
     setEditing(null)
     setShowForm(false)
   }
 
-  return (
-    <section className="bloques-page">
-      <header className="bloques-page__header">
-        <div>
-          <p className="page-eyebrow">Infraestructura</p>
-          <h2 className="bloques-page__title">Gestionar bloques</h2>
-        </div>
-        {!showForm && (
-          <button
-            type="button"
-            className="bloques-add"
-            onClick={() => {
-              setEditing(null)
-              setShowForm(true)
-            }}
-          >
-            Añadir bloque
-          </button>
-        )}
-      </header>
-
-      {showForm && (
-        <BloqueForm
-          token={token}
-          bloque={editing}
-          onCreated={handleCreated}
-          onUpdated={handleUpdated}
-          onLogout={onLogout}
-          onCancel={closeForm}
-        />
-      )}
-
-      {status === 'loading' && (
-        <p className="bloques-state">Cargando bloques…</p>
-      )}
-
-      {status === 'error' && (
+  if (status === 'error') {
+    return (
+      <section className="bloques-page">
         <div className="bloques-state bloques-state--error" role="alert">
           <p>{error?.message}</p>
           {error?.retryable && (
@@ -132,15 +110,95 @@ export default function BloquesPage({ token, onLogout }) {
             </button>
           )}
         </div>
-      )}
+      </section>
+    )
+  }
 
-      {status === 'ready' && bloques.length === 0 && (
-        <p className="bloques-state">Aún no hay bloques registrados</p>
-      )}
+  return (
+    <section className="bloques-page">
+      <div className="bloques-layout">
+        <div className="bloques-layout__panel bloques-layout__panel--lista">
+          <header className="bloques-layout__cabecera">
+            <h3>Bloques registrados</h3>
+            {!showForm && (
+              <button type="button" className="bloques-add" onClick={openCreate}>
+                Añadir bloque
+              </button>
+            )}
+          </header>
 
-      {status === 'ready' && bloques.length > 0 && (
-        <BloquesList bloques={bloques} onEdit={handleEdit} />
-      )}
+          {status === 'loading' && (
+            <p className="bloques-layout__vacio">Cargando bloques…</p>
+          )}
+
+          {status === 'ready' && bloques.length === 0 && (
+            <p className="bloques-layout__vacio">Aún no hay bloques registrados.</p>
+          )}
+
+          {status === 'ready' && bloques.length > 0 && (
+            <>
+              <p className="bloques-layout__contador">
+                {bloques.length} {bloques.length === 1 ? 'bloque' : 'bloques'} en esta sede
+              </p>
+              <BloquesList
+                bloques={bloques}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+              />
+            </>
+          )}
+        </div>
+
+        <div className="bloques-layout__panel bloques-layout__panel--detalle">
+          {status === 'loading' && (
+            <p className="bloques-layout__vacio">Cargando bloques…</p>
+          )}
+
+          {status === 'ready' && showForm && (
+            <BloqueForm
+              token={token}
+              bloque={editing}
+              onCreated={handleCreated}
+              onUpdated={handleUpdated}
+              onLogout={onLogout}
+              onCancel={closeForm}
+            />
+          )}
+
+          {status === 'ready' && !showForm && bloqueSeleccionado && (
+            <div className="bloque-detalle">
+              <header className="bloque-detalle__cabecera">
+                <div>
+                  <p className="bloque-detalle__eyebrow">Bloque</p>
+                  <h3>{bloqueSeleccionado.nombre}</h3>
+                </div>
+                <button
+                  type="button"
+                  className="bloques-edit"
+                  onClick={() => handleEdit(bloqueSeleccionado)}
+                >
+                  Editar bloque
+                </button>
+              </header>
+
+              <dl className="bloque-detalle__datos">
+                <div>
+                  <dt>Pisos</dt>
+                  <dd>{bloqueSeleccionado.pisos}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+
+          {status === 'ready' && !showForm && !bloqueSeleccionado && (
+            <p className="bloques-layout__vacio">
+              {bloques.length === 0
+                ? 'Cuando añadas un bloque, aquí verás su información.'
+                : 'Selecciona un bloque de la lista para ver su información.'}
+            </p>
+          )}
+        </div>
+      </div>
     </section>
   )
 }

@@ -37,6 +37,6 @@
 @media (max-width: 650px) {
   .dashboard-layout { flex-direction: column; } .dashboard-sidebar { width: 100%; padding: 12px; border-right: 0; }
   .sidebar-header { display: none; } .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
-  .dashboard-content { padding: 16px; } .dashboard-header { flex-wrap: wrap; gap: 12px; }
+  .dashboard-main { padding: 0 16px 16px; } .dashboard-header { flex-wrap: wrap; gap: 12px; padding: 16px; }
   .usuarios-card { padding: 18px; } .usuarios-counts { grid-template-columns: repeat(2, 1fr); }
 }
