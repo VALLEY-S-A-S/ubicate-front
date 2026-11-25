@@ -11,9 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import UsuariosPage from '../../usuarios/pages/UsuariosPage'
 import ImportarHorariosPage from '../../franjas/pages/ImportarHorariosPage'
-import BloquesPage from '../../espacios/pages/BloquesPage'
 import EspaciosPage from '../../espacios/pages/EspaciosPage'
-import GestionEspaciosPage from '../../espacios/pages/GestionEspaciosPage'
 import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
 import CatalogoPage from '../../espacios/pages/CatalogoPage'
 import ReportesPage from '../../reportes/pages/ReportesPage.jsx'
@@ -69,10 +67,30 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const isEspacios = route === '/dashboard/espacios'
   const isBloques = route === '/dashboard/espacios/bloques'
   const isGestionEspacios = route === '/dashboard/espacios/espacios'
+  // El módulo de espacios agrupa bloques y espacios en una sola vista con pestañas.
+  const isModuloEspacios = isEspacios || isBloques || isGestionEspacios
   // lady vidal - HU-06: sección de asignaciones con filtros y horario.
   const isAsignaciones = route === '/dashboard/asignaciones'
   const isCatalogo = route === '/dashboard/catalogo'
   const isReportes = route === '/dashboard/reportes'
+
+  // Iniciales del avatar: nombre, o correo como respaldo.
+  const inicialesUsuario = (() => {
+    const fuentes = [session?.user?.nombre, session?.user?.correoInstitucional].filter(Boolean)
+    for (const fuente of fuentes) {
+      const partes = fuente
+        .split('@')[0]
+        .split(/[\s._-]+/)
+        .map((parte) => parte.trim())
+        .filter(Boolean)
+      if (!partes.length) continue
+      const letras = partes.length > 1
+        ? partes.slice(0, 2).map((parte) => parte[0])
+        : [partes[0][0], partes[0][1]].filter(Boolean)
+      if (letras.length) return letras.join('').toUpperCase()
+    }
+    return 'AD'
+  })()
 
   const iconUsuarios = (
     <svg className="sidebar-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -102,19 +120,19 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             <img src="/logo.png" alt="Ubícate" className="sidebar-logo" />
           </div>
           <nav className="sidebar-nav">
-            <a href="#/dashboard/usuarios" className={`sidebar-link${isUsuarios ? ' active' : ''}`}>{iconUsuarios}Importar usuarios</a>
-            <a href="#/dashboard/horarios" className={`sidebar-link${isHorarios ? ' active' : ''}`}>{iconHorarios}Importar horarios</a>
-            <a
-              href="#/dashboard/espacios"
-              className={`sidebar-link${route?.startsWith('/dashboard/espacios') ? ' active' : ''}`}
-            >
-              {iconEspacios}Administrar espacios
-            </a>
             <a
               href="#/dashboard/asignaciones"
               className={`sidebar-link${isAsignaciones ? ' active' : ''}`}
             >
               {iconAsignaciones}Asignaciones
+            </a>
+            <a href="#/dashboard/usuarios" className={`sidebar-link${isUsuarios ? ' active' : ''}`}>{iconUsuarios}Importar usuarios</a>
+            <a href="#/dashboard/horarios" className={`sidebar-link${isHorarios ? ' active' : ''}`}>{iconHorarios}Importar horarios</a>
+            <a
+              href="#/dashboard/espacios"
+              className={`sidebar-link${isModuloEspacios ? ' active' : ''}`}
+            >
+              {iconEspacios}Administrar espacios
             </a>
             <a
               href="#/dashboard/catalogo"
@@ -157,14 +175,14 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                   {' > '}
                   Administrar espacios
                   {' > '}
-                  <span>Gestionar bloques</span>
+                  <span>Bloques</span>
                 </>
               ) : isGestionEspacios ? (
                 <>
                   {' > '}
                   Administrar espacios
                   {' > '}
-                  <span>Gestionar espacios</span>
+                  <span>Espacios</span>
                 </>
               ) : isEspacios ? (
                 <>
@@ -182,6 +200,9 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                   aria-haspopup="menu"
                   aria-expanded={showUserMenu}
                 >
+                  <span className="user-avatar" aria-hidden="true">
+                    {inicialesUsuario}
+                  </span>
                   <span className="user-info">
                     {session?.user?.nombre ?? 'Administrador'}
                   </span>
@@ -227,16 +248,13 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
               <CatalogoPage token={session?.token} />
             ) : isReportes ? (
               <ReportesPage token={session?.token} sedeId={session?.user?.sedeId} rol={session?.user?.rol} />
-            ) : isBloques ? (
-              <BloquesPage token={session?.token} onLogout={onLogout} />
-            ) : isGestionEspacios ? (
-              <GestionEspaciosPage
+            ) : isModuloEspacios ? (
+              <EspaciosPage
                 token={session?.token}
                 onLogout={onLogout}
                 sedeId={session?.user?.sedeId}
+                route={route}
               />
-            ) : isEspacios ? (
-              <EspaciosPage />
             ) : (
               <section className="module-section">
                 <h3>Bienvenido al dashboard</h3>
