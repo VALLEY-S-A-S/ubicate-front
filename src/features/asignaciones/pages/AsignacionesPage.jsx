@@ -4,6 +4,7 @@
  * guardar todos los cambios en una sola operación.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import CambiarEspacioModal from '../components/CambiarEspacioModal'
 import EspacioDetalle from '../components/EspacioDetalle'
 import FiltrosHorario from '../components/FiltrosHorario'
 import FranjaDetalle from '../components/FranjaDetalle'
@@ -20,8 +21,11 @@ import { listarTiposEspacio } from '../../espacios/services/espaciosApi'
 import {
   aplicarCambiosHorario,
   crearOcupacionLocal,
+  espaciosDisponibles,
+  filtrarAsignaciones,
   formatearFecha,
   franjaDesdeOcupacion,
+  listaAsignaciones,
   minutosDeHora,
   puedeAsignarFranja,
   tieneFiltros,
@@ -67,11 +71,14 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
   const [pendientesError, setPendientesError] = useState('')
   const [pendientesReload, setPendientesReload] = useState(0)
   const [franjaArrastrada, setFranjaArrastrada] = useState(null)
+  const [vistaFranjas, setVistaFranjas] = useState('pendientes')
+  const [asignacionEditando, setAsignacionEditando] = useState(null)
   const [asignacionesNuevas, setAsignacionesNuevas] = useState(() => new Map())
   const [eliminadas, setEliminadas] = useState(() => new Set())
   const [devoluciones, setDevoluciones] = useState(() => new Map())
   const [guardando, setGuardando] = useState(false)
   const [guardarError, setGuardarError] = useState('')
+  const [confirmandoDescarte, setConfirmandoDescarte] = useState(false)
   // Se conserva la referencia para no repetir la consulta si el padre cambia.
   const logoutRef = useRef(onLogout)
 
@@ -273,10 +280,45 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
     })
   }, [pendientes, asignacionesNuevas, devoluciones])
 
+  const asignacionesVista = useMemo(
+    () => filtrarAsignaciones(listaAsignaciones(horarioVista), filtrosFranjas),
+    [horarioVista, filtrosFranjas],
+  )
+
+  const franjaEditando = useMemo(
+    () =>
+      asignacionEditando
+        ? franjaDesdeOcupacion(asignacionEditando.ocupacion, horarioVista?.dias ?? [])
+        : null,
+    [asignacionEditando, horarioVista],
+  )
+
+  const espaciosEditables = useMemo(
+    () =>
+      espaciosDisponibles(
+        horarioVista,
+        franjaEditando,
+        asignacionEditando?.espacio?.id,
+      ),
+    [horarioVista, franjaEditando, asignacionEditando],
+  )
+
   const hayFiltros = tieneFiltros(filtros)
   const hayFiltrosFranjas = tieneFiltrosFranjas(filtrosFranjas)
   const hayCambios = asignacionesNuevas.size > 0 || eliminadas.size > 0
   const mostrarHorario = Boolean(horarioVista) && (status === 'ready' || status === 'updating')
+
+  useEffect(() => {
+    if (!hayCambios) return undefined
+
+    const onBeforeUnload = (event) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [hayCambios])
 
   function actualizarFiltro(campo, valor) {
     setFiltros((actual) => {
@@ -303,6 +345,21 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
 
   function arrastrarFranja(franja) {
     setFranjaArrastrada(franja)
+    setDiaSeleccionado(Number(franja.diaSemana))
+  }
+
+  function arrastrarAsignacion(evento, espacio) {
+    const franja = franjaDesdeOcupacion(
+      evento,
+      horarioVista?.dias ?? horario?.dias ?? [],
+    )
+    if (!franja) return
+
+    setFranjaArrastrada({
+      ...franja,
+      origenOcupacionId: evento.id,
+      origenEspacioId: espacio?.id,
+    })
     setDiaSeleccionado(Number(franja.diaSemana))
   }
 
@@ -335,6 +392,13 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
 
     const ocupacion = crearOcupacionLocal(franja, espacio.id)
     const franjaId = Number(franja.id)
+
+    if (
+      franja.origenOcupacionId &&
+      !String(franja.origenOcupacionId).startsWith('tmp-')
+    ) {
+      setEliminadas((actual) => new Set(actual).add(franja.origenOcupacionId))
+    }
 
     setAsignacionesNuevas((actual) => {
       const siguiente = new Map(actual)
@@ -379,6 +443,61 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
     setFranjaArrastrada(null)
   }
 
+  function abrirEdicion(ocupacion, espacio) {
+    if (!ocupacion) return
+    setAsignacionEditando({ ocupacion, espacio })
+  }
+
+  function reubicarAsignacion(ocupacion, espacioDestino) {
+    if (!ocupacion || !espacioDestino) return
+
+    const franja = franjaDesdeOcupacion(
+      ocupacion,
+      horarioVista?.dias ?? horario?.dias ?? [],
+    )
+    if (!franja) return
+
+    const franjaId = Number(franja.id)
+    const ocupacionNueva = crearOcupacionLocal(franja, espacioDestino.id)
+
+    setAsignacionesNuevas((actual) => {
+      const siguiente = new Map(actual)
+      siguiente.set(franjaId, {
+        franja,
+        espacioId: espacioDestino.id,
+        ocupacion: ocupacionNueva,
+      })
+      return siguiente
+    })
+    setDevoluciones((actual) => {
+      const siguiente = new Map(actual)
+      siguiente.delete(franjaId)
+      return siguiente
+    })
+
+    if (!String(ocupacion.id).startsWith('tmp-')) {
+      setEliminadas((actual) => new Set(actual).add(ocupacion.id))
+    }
+
+    setDiaSeleccionado(Number(franja.diaSemana))
+  }
+
+  function confirmarReubicacion(espacioDestino) {
+    if (!asignacionEditando) return
+    reubicarAsignacion(asignacionEditando.ocupacion, espacioDestino)
+    setAsignacionEditando(null)
+  }
+
+  function descartarCambios() {
+    setAsignacionesNuevas(new Map())
+    setEliminadas(new Set())
+    setDevoluciones(new Map())
+    setFranjaArrastrada(null)
+    setAsignacionEditando(null)
+    setGuardarError('')
+    setConfirmandoDescarte(false)
+  }
+
   async function guardarCambios() {
     if (!hayCambios || guardando) return
 
@@ -397,6 +516,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
       setAsignacionesNuevas(new Map())
       setEliminadas(new Set())
       setDevoluciones(new Map())
+      setConfirmandoDescarte(false)
       setReload((valor) => valor + 1)
       setPendientesReload((valor) => valor + 1)
     } catch (failure) {
@@ -416,6 +536,7 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
     <section className="asignaciones">
       <header className="asignaciones__cabecera">
         <div>
+          <p className="page-eyebrow">Gestión académica</p>
           <h2 className="asignaciones__titulo">Asignaciones</h2>
           <p className="asignaciones__subtitulo">
             Asigna los espacios a los respectivos docentes acorde a los horarios
@@ -425,11 +546,21 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
         <div className="asignaciones__acciones">
           <button
             type="button"
-            className="asignaciones__boton"
+            className="asignaciones__boton asignaciones__boton--secundario"
+            disabled={!hayCambios || guardando}
+            onClick={() => setConfirmandoDescarte(true)}
+          >
+            Descartar
+          </button>
+          <button
+            type="button"
+            className={`asignaciones__boton${
+              hayCambios ? ' asignaciones__boton--cambios' : ''
+            }`}
             disabled={!hayCambios || guardando}
             onClick={guardarCambios}
           >
-            {guardando ? 'Guardando…' : 'Guardar'}
+            {guardando ? 'Guardando…' : hayCambios ? 'Guardar cambios' : 'Guardar'}
           </button>
         </div>
       </header>
@@ -440,9 +571,70 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
         </p>
       )}
 
+      {hayCambios && (
+        <div
+          className={`asignaciones__guardar-barra${
+            confirmandoDescarte ? ' asignaciones__guardar-barra--confirmacion' : ''
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          {confirmandoDescarte ? (
+            <>
+              <p className="asignaciones__guardar-texto">
+                ¿Descartar los cambios?{' '}
+                <strong>Esta acción no se puede deshacer.</strong>
+              </p>
+              <div className="asignaciones__guardar-acciones">
+                <button
+                  type="button"
+                  className="asignaciones__guardar-boton asignaciones__guardar-boton--secundario"
+                  onClick={() => setConfirmandoDescarte(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="asignaciones__guardar-boton asignaciones__guardar-boton--peligro"
+                  onClick={descartarCambios}
+                >
+                  Sí, descartar
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="asignaciones__guardar-texto">
+                Tienes cambios sin guardar. Guárdalos o descártalos.
+              </p>
+              <div className="asignaciones__guardar-acciones">
+                <button
+                  type="button"
+                  className="asignaciones__guardar-boton asignaciones__guardar-boton--secundario"
+                  disabled={guardando}
+                  onClick={() => setConfirmandoDescarte(true)}
+                >
+                  Descartar cambios
+                </button>
+                <button
+                  type="button"
+                  className="asignaciones__guardar-boton"
+                  disabled={guardando}
+                  onClick={guardarCambios}
+                >
+                  {guardando ? 'Guardando…' : 'Guardar cambios'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="asignaciones__layout">
         <FranjasPanel
           franjas={franjasVista}
+          asignaciones={asignacionesVista}
+          vista={vistaFranjas}
           filtros={filtrosFranjas}
           onChange={actualizarFiltroFranja}
           onClear={limpiarFiltrosFranjas}
@@ -453,6 +645,9 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
           onArrastrar={arrastrarFranja}
           onDragEnd={terminarArrastre}
           onDevolverAsignacion={devolverAsignacion}
+          onVistaChange={setVistaFranjas}
+          onEditarAsignacion={abrirEdicion}
+          onQuitarAsignacion={devolverAsignacion}
         />
 
         <div className="asignaciones__contenido">
@@ -503,7 +698,9 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
                 franjaArrastrada={franjaArrastrada}
                 puedeSoltarEn={puedeSoltarEn}
                 onAsignarFranja={asignarFranja}
+                onArrastrarAsignacion={arrastrarAsignacion}
                 onDragEnd={terminarArrastre}
+                onEditarAsignacion={abrirEdicion}
               />
 
               {horarioVista?.fechaInicioSemana && (
@@ -527,6 +724,15 @@ export default function AsignacionesPage({ token, sedeId, onLogout }) {
       <FranjaDetalle
         franja={franjaDetalle}
         onClose={() => setFranjaDetalle(null)}
+      />
+
+      <CambiarEspacioModal
+        key={asignacionEditando?.ocupacion?.id ?? 'sin-asignacion'}
+        asignacion={asignacionEditando}
+        espacios={espaciosEditables}
+        dias={horarioVista?.dias}
+        onConfirm={confirmarReubicacion}
+        onClose={() => setAsignacionEditando(null)}
       />
     </section>
   )

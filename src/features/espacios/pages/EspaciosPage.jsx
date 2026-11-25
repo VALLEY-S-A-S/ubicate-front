@@ -3,7 +3,8 @@ import '../styles/espacios.css'
 export default function EspaciosPage() {
   return (
     <section className="espacios-page">
-      <h2 className="espacios-page__title">Administrar espacios</h2>
+      <p className="page-eyebrow">Infraestructura</p>
+      <h2 className="espacios-landing__title">Administrar espacios</h2>
       <p className="espacios-page__subtitle">Elige qué quieres gestionar</p>
 
       <div className="espacios-options">

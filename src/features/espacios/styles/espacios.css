@@ -11,6 +11,13 @@
   color: var(--color-text-primary);
 }
 
+.espacios-landing__title {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  color: #1f2937;
+}
+
 .espacios-page__subtitle {
   margin: 0 0 24px;
   font-size: 14px;
@@ -87,9 +94,9 @@ a.espacios-option:hover {
 
 .bloques-page__title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .bloques-add {
@@ -898,7 +905,8 @@ a.espacios-option:hover {
 }
 .gestion-espacios__intro h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
   color: #1f2937;
 }
 .gestion-espacios__intro p {
@@ -1048,6 +1056,7 @@ a.espacios-option:hover {
 .inventario__tabla th,
 .inventario__tabla td {
   text-align: left;
+  vertical-align: middle;
   padding: 10px 8px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
@@ -1059,8 +1068,10 @@ a.espacios-option:hover {
   font-weight: 600;
 }
 .inventario__acciones {
-  display: flex;
-  gap: 6px;
+  white-space: nowrap;
+}
+.inventario__acciones > button + button {
+  margin-left: 6px;
 }
 
 /* ===== Pantalla Catálogo ===== */
@@ -1211,4 +1222,19 @@ a.espacios-option:hover {
   .catalogo-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* Elemento desactivado dentro del inventario de un espacio */
+.inventario-row--inactivo td {
+  background: #fef2f2;
+}
+.inventario-badge-inactivo {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-brand);
+  background: #fde8ea;
 }
