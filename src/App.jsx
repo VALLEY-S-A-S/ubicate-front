@@ -90,7 +90,7 @@ export default function App() {
   }, [route])
 
   useEffect(() => {
-    if (token && sessionStatus === 'ready' && ['/login', '/registro'].includes(route)) window.location.replace('#/dashboard')
+    if (token && sessionStatus === 'ready' && ['/login', '/registro'].includes(route)) window.location.replace('#/dashboard/asignaciones')
     else if (!token && isDashboardRoute(route)) window.location.replace('#/login')
   }, [route, token, sessionStatus])
 
