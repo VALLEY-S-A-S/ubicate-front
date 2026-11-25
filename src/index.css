@@ -211,7 +211,7 @@ button {
 
 .dashboard-content {
   flex: 1;
-  padding: 24px;
+  padding: 0;
   background: var(--color-bg);
   min-height: 400px;
 }
@@ -221,7 +221,8 @@ button {
   justify-content: space-between;
   align-items: center;
   margin: 0 0 24px;
-  padding-bottom: 16px;
+  padding: 20px 24px 16px;
+  background: #fff;
   border-bottom: 1px solid #E5E7EB;
 }
 
@@ -246,12 +247,31 @@ button {
 
 .user-info {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .dashboard-main {
   width: 100%;
+  padding: 0 24px 24px;
 }
 
 .module-section {
@@ -310,7 +330,8 @@ button {
 .user-dropdown-arrow {
   width: 18px;
   height: 18px;
-  color: #B71C2B;
+  flex-shrink: 0;
+  color: #111827;
   transition: transform 0.2s;
 }
 

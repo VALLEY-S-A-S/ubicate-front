@@ -3,6 +3,7 @@ import { afterEach, test } from 'node:test'
 import {
   descargarPlantilla,
   importarFranjas,
+  listarHorariosCargados,
   validarArchivoFranjas,
 } from './franjasImportApi.js'
 
@@ -42,6 +43,20 @@ test('sube el Excel como multipart con el campo archivo y sin cabecera json', as
   assert.ok(llamadas[0].options.body instanceof FormData)
   assert.ok(llamadas[0].options.body.has('archivo'))
   assert.equal(creada.totalGrupos, 1)
+})
+
+test('consulta el vistazo de horarios cargados sin token', async () => {
+  const llamadas = []
+  globalThis.fetch = async (url, options) => {
+    llamadas.push({ url, options })
+    return Response.json({ contenido: [], page: 0, size: 8, total: 0 })
+  }
+
+  const respuesta = await listarHorariosCargados()
+
+  assert.ok(llamadas[0].url.endsWith('/api/horarios/publicos?page=0&size=8'))
+  assert.equal(llamadas[0].options.headers.Authorization, undefined)
+  assert.equal(respuesta.size, 8)
 })
 
 test('valida el archivo antes de enviar', () => {
