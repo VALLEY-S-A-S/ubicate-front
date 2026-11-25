@@ -102,6 +102,12 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
             <img src="/logo.png" alt="Ubícate" className="sidebar-logo" />
           </div>
           <nav className="sidebar-nav">
+            <a
+              href="#/dashboard/asignaciones"
+              className={`sidebar-link${isAsignaciones ? ' active' : ''}`}
+            >
+              {iconAsignaciones}Asignaciones
+            </a>
             <a href="#/dashboard/usuarios" className={`sidebar-link${isUsuarios ? ' active' : ''}`}>{iconUsuarios}Importar usuarios</a>
             <a href="#/dashboard/horarios" className={`sidebar-link${isHorarios ? ' active' : ''}`}>{iconHorarios}Importar horarios</a>
             <a
@@ -109,12 +115,6 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
               className={`sidebar-link${route?.startsWith('/dashboard/espacios') ? ' active' : ''}`}
             >
               {iconEspacios}Administrar espacios
-            </a>
-            <a
-              href="#/dashboard/asignaciones"
-              className={`sidebar-link${isAsignaciones ? ' active' : ''}`}
-            >
-              {iconAsignaciones}Asignaciones
             </a>
             <a
               href="#/dashboard/catalogo"
