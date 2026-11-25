@@ -184,12 +184,6 @@ export default function GestionEspaciosPage({ token, onLogout, sedeId }) {
 
   return (
     <div className="gestion-espacios-wrap">
-      <header className="gestion-espacios__intro">
-        <p className="page-eyebrow">Infraestructura</p>
-        <h2>Gestión de espacios e inventario</h2>
-        <p>Consulta y filtra los espacios del campus y administra el inventario de cada uno.</p>
-      </header>
-
       <section className="gestion-espacios">
       <div className="gestion-espacios__panel gestion-espacios__panel--lista">
         <header className="espacios-page__header">
