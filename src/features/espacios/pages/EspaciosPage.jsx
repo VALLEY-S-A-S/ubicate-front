@@ -38,7 +38,7 @@ export default function EspaciosPage({ token, onLogout, sedeId, route }) {
 
       <div className="espacios-tabs__contenido">
         {pestanaActiva === 'bloques' ? (
-          <BloquesPage token={token} onLogout={onLogout} />
+          <BloquesPage token={token} onLogout={onLogout} sedeId={sedeId} />
         ) : (
           <GestionEspaciosPage token={token} onLogout={onLogout} sedeId={sedeId} />
         )}

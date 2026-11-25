@@ -3,9 +3,12 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import App from '../src/App.jsx'
 import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/ActivatePage.jsx'
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
+import PerfilModal from '../src/features/auth/components/PerfilModal.jsx'
 import ReporteDetalleModal from '../src/features/reportes/components/ReporteDetalleModal.jsx'
 import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
-import BloquesList from '../src/features/espacios/components/BloquesList.jsx'
+import BloquesList, { filtrarBloques } from '../src/features/espacios/components/BloquesList.jsx'
+import BloqueDetalle from '../src/features/espacios/components/BloqueDetalle.jsx'
+import { BLOQUES_ICONOS, iconoBloque } from '../src/features/espacios/components/bloquesVisual.jsx'
 import BloquesPage from '../src/features/espacios/pages/BloquesPage.jsx'
 import ImportarHorariosPage from '../src/features/franjas/pages/ImportarHorariosPage.jsx'
 import VerifyEmailPage from '../src/features/auth/pages/VerifyEmailPage.jsx'
@@ -58,9 +61,10 @@ check('módulo de asignaciones muestra filtros y estructura del horario', () => 
   for (const text of ['Asignaciones', 'Franjas', 'Pendientes', 'Asignadas', 'Inicio', 'Fin', 'Buscar por nombre', 'Tipo de espacio', 'Bloque', 'Piso', 'Cargando horario…']) assert.ok(html.includes(text))
   assert.ok(!html.includes('Bearer jwt'))
 })
-check('módulo de horarios muestra plantilla, carga y conteos', () => {
+check('módulo de horarios muestra plantilla, carga y vistazo', () => {
   const html = renderToStaticMarkup(<ImportarHorariosPage token="jwt" />)
-  for (const text of ['Importar horarios', 'Descargar plantilla Excel', 'horarios-archivo', '2. Sube el Excel', 'CATALOGO ASIGNATURA - SRA']) assert.ok(html.includes(text))
+  for (const text of ['Importar horarios', 'Gestión académica', 'Descargar plantilla Excel', 'horarios-archivo', 'Carga el archivo de horarios', 'Arrastra y suelta aquí tu archivo Excel', 'Seleccionar archivo', 'Formatos permitidos', 'Horarios cargados']) assert.ok(html.includes(text))
+  assert.ok(html.includes('aria-label="Calendario con archivo Excel"'))
   assert.ok(!html.includes('Bearer jwt'))
 })
 check('el menú ofrece importar horarios debajo de importar usuarios', () => {
@@ -228,6 +232,209 @@ check('la pestaña de bloques conserva encabezado, alta y estados', () => {
   assert.ok(html.includes('Añadir bloque'))
   assert.ok(html.includes('Cargando bloques…'))
   assert.ok(!html.includes('bloques-list'))
+  assert.ok(html.includes('Buscar bloque'))
+})
+
+check('la búsqueda de bloques ignora mayúsculas y tildes', () => {
+  const bloques = [
+    { id: 1, nombre: 'Bloque A', pisos: 2 },
+    { id: 2, nombre: 'Zona Deportiva', pisos: 1 },
+    { id: 3, nombre: 'Álgebra', pisos: 3 },
+  ]
+  assert.deepEqual(filtrarBloques(bloques, 'BLOQUE a').map((b) => b.id), [1])
+  assert.deepEqual(filtrarBloques(bloques, 'deportiva').map((b) => b.id), [2])
+  assert.deepEqual(filtrarBloques(bloques, 'algebra').map((b) => b.id), [3])
+  assert.equal(filtrarBloques(bloques, 'inexistente').length, 0)
+  assert.equal(filtrarBloques(bloques, '   ').length, 3)
+})
+
+check('el detalle muestra métricas, pisos y acción de edición', () => {
+  const html = renderToStaticMarkup(
+    <BloqueDetalle
+      bloque={{ id: 1, nombre: 'Bloque A', pisos: 2 }}
+      resumen={{ total: 18, porPiso: { 1: 9, 2: 9 } }}
+      vacio="Selecciona un bloque"
+      onEdit={() => {}}
+    />,
+  )
+  for (const text of [
+    'Bloque',
+    'Bloque A',
+    'Pisos',
+    'Espacios',
+    '18',
+    'Piso 1',
+    'Piso 2',
+    '9 espacios',
+    'Editar bloque',
+    'icon-tile',
+  ]) {
+    assert.ok(html.includes(text), `falta: ${text}`)
+  }
+
+  const sinSeleccion = renderToStaticMarkup(
+    <BloqueDetalle
+      bloque={null}
+      resumen={undefined}
+      vacio="Selecciona un bloque de la lista para ver su información."
+    />,
+  )
+  assert.ok(sinSeleccion.includes('Selecciona un bloque de la lista para ver su información.'))
+  assert.ok(!sinSeleccion.includes('icon-tile'))
+})
+
+check('el detalle sin conteos no inventa números de espacios', () => {
+  const html = renderToStaticMarkup(
+    <BloqueDetalle
+      bloque={{ id: 4, nombre: 'Bloque B', pisos: 1 }}
+      resumen={{ total: null, porPiso: {} }}
+      vacio="Selecciona un bloque"
+      onEdit={() => {}}
+    />,
+  )
+  assert.ok(html.includes('—'))
+  assert.ok(html.includes('Piso 1'))
+  assert.ok(!html.includes('undefined'))
+})
+
+check('la lista usa icon-tile y estado activo', () => {
+  const html = renderToStaticMarkup(
+    <BloquesList
+      bloques={[
+        { id: 1, nombre: 'Bloque A', pisos: 3 },
+        { id: 2, nombre: 'Zona Deportiva', pisos: 1 },
+      ]}
+      selectedId={2}
+      onSelect={() => {}}
+    />,
+  )
+  assert.equal((html.match(/icon-tile--medio/g) ?? []).length, 2)
+  assert.equal((html.match(/aria-pressed="true"/g) ?? []).length, 1)
+  assert.ok(html.includes('bloques-list__item--active'))
+  assert.ok(html.includes('Zona Deportiva'))
+})
+
+check('el ícono arranca en edificio y el nombre no decide nada', () => {
+  assert.deepEqual(BLOQUES_ICONOS, ['edificio', 'balon', 'zona'])
+  assert.equal(iconoBloque(undefined), 'edificio')
+  assert.equal(iconoBloque(''), 'edificio')
+  assert.equal(iconoBloque('lapiz'), 'edificio')
+  assert.equal(iconoBloque('inexistente'), 'edificio')
+  assert.equal(iconoBloque('balon'), 'balon')
+  assert.equal(iconoBloque('zona'), 'zona')
+  // Sin reglas automáticas: el nombre del bloque no cambia el resultado.
+  assert.equal(iconoBloque(undefined), iconoBloque('Zona Deportiva'))
+  assert.equal(iconoBloque(undefined), iconoBloque('Cancha Múltiple'))
+  assert.equal(iconoBloque(undefined), iconoBloque('Salón Multicultural'))
+})
+
+check('el detalle ofrece las tres opciones de ícono', () => {
+  const html = renderToStaticMarkup(
+    <BloqueDetalle
+      bloque={{ id: 7, nombre: 'Salón Multicultural', pisos: 1 }}
+      resumen={{ total: 4, porPiso: { 1: 4 } }}
+      vacio="Selecciona un bloque"
+      onEdit={() => {}}
+    />,
+  )
+  for (const etiqueta of ['Edificio', 'Balón', 'Árbol']) {
+    assert.equal((html.match(new RegExp(`aria-label="${etiqueta}"`, 'g')) ?? []).length, 1, etiqueta)
+  }
+  assert.equal((html.match(/selector-icono--sel/g) ?? []).length, 1)
+  assert.equal((html.match(/aria-pressed="true"/g) ?? []).length, 1)
+  const presionado = html.match(/<button[^>]*aria-pressed="true"[^>]*>/)?.[0] ?? ''
+  assert.ok(presionado.includes('Edificio'), presionado)
+
+  // La cabecera muestra el mismo ícono por defecto (edificio).
+  const cabecera = html.slice(html.indexOf('bloque-detalle__cabecera'), html.indexOf('</header>'))
+  assert.ok(cabecera.includes('M5 9h14M5 13h14M5 17h14M10 3v18M15 3v18'))
+})
+
+check('la elección manual de ícono se respeta en cabecera y lista', () => {
+  const detalle = renderToStaticMarkup(
+    <BloqueDetalle
+      bloque={{ id: 7, nombre: 'Salón Multicultural', pisos: 1 }}
+      resumen={{ total: 4, porPiso: { 1: 4 } }}
+      vacio="Selecciona un bloque"
+      onEdit={() => {}}
+      iconos={{ 7: 'zona' }}
+      onCambiarIcono={() => {}}
+    />,
+  )
+  const cabecera = detalle.slice(detalle.indexOf('bloque-detalle__cabecera'), detalle.indexOf('</header>'))
+  assert.ok(cabecera.includes('M12 3 7 10h3l-4 6h12l-4-6h3z'), 'la cabecera debe mostrar el árbol')
+  const presionado = detalle.match(/<button[^>]*aria-pressed="true"[^>]*>/)?.[0] ?? ''
+  assert.ok(presionado.includes('Árbol'), presionado)
+
+  const lista = renderToStaticMarkup(
+    <BloquesList
+      bloques={[
+        { id: 7, nombre: 'Salón Multicultural', pisos: 1 },
+        { id: 8, nombre: 'Bloque A', pisos: 2 },
+      ]}
+      selectedId={7}
+      onSelect={() => {}}
+      iconos={{ 7: 'balon' }}
+    />,
+  )
+  // Cada bloque pinta exactamente un ícono: el 7 cambió a balón y el 8
+  // se queda en edificio porque no tiene elección manual.
+  assert.equal((lista.match(/M12 3v18M3 12h18/g) ?? []).length, 1, 'el bloque 7 debe usar el balón')
+  assert.equal((lista.match(/M5 9h14M5 13h14M5 17h14/g) ?? []).length, 1, 'el bloque 8 sigue en edificio')
+})
+
+check('el perfil muestra los datos de solo lectura', () => {
+  const html = renderToStaticMarkup(
+    <PerfilModal
+      usuario={{
+        nombre: 'Esteban Moreno',
+        correoInstitucional: 'esteban@correounivalle.edu.co',
+        cedulaOCodigo: '1234567890',
+        sedeNombre: 'Cali',
+        rol: 'ADMIN',
+      }}
+      onCerrar={() => {}}
+    />,
+  )
+  for (const text of [
+    'Mi perfil',
+    'Nombre',
+    'Correo electrónico',
+    'Identificación',
+    'Sede',
+    'Rol',
+    'Esteban Moreno',
+    'esteban@correounivalle.edu.co',
+    '1234567890',
+    'Cali',
+    'ADMIN',
+  ]) {
+    assert.ok(html.includes(text), `falta: ${text}`)
+  }
+  assert.ok(html.includes('role="dialog"'))
+  assert.ok(html.includes('aria-modal="true"'))
+  assert.ok(html.includes('aria-label="Cerrar"'))
+  assert.ok(!html.includes('<input'), 'el perfil no permite editar')
+})
+
+check('la identificación usa el código institucional y no inventa texto', () => {
+  const html = renderToStaticMarkup(
+    <PerfilModal
+      usuario={{
+        nombre: 'Ana',
+        correoInstitucional: 'ana@correounivalle.edu.co',
+        cedulaOCodigo: null,
+        codigoInstitucional: '2024001',
+        sedeNombre: 'Palmira',
+        rol: 'ADMINISTRADOR',
+      }}
+      onCerrar={() => {}}
+    />,
+  )
+  assert.ok(html.includes('2024001'))
+  assert.ok(html.includes('Palmira'))
+  assert.ok(!html.includes('No registrado'))
+  assert.ok(!html.includes('No asignada'))
 })
 
 clearSession()

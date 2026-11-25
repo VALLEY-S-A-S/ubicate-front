@@ -15,9 +15,11 @@ import EspaciosPage from '../../espacios/pages/EspaciosPage'
 import AsignacionesPage from '../../asignaciones/pages/AsignacionesPage'
 import CatalogoPage from '../../espacios/pages/CatalogoPage'
 import ReportesPage from '../../reportes/pages/ReportesPage.jsx'
+import PerfilModal from '../components/PerfilModal'
 
 const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showPerfil, setShowPerfil] = useState(false)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
@@ -222,6 +224,17 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
                       type="button"
                       className="user-menu-item"
                       role="menuitem"
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        setShowPerfil(true)
+                      }}
+                    >
+                      Mi perfil
+                    </button>
+                    <button
+                      type="button"
+                      className="user-menu-item"
+                      role="menuitem"
                       onClick={handleLogoutClick}
                     >
                       Cerrar sesión
@@ -264,6 +277,10 @@ const DashboardPage = ({ onLogout, onRequestLogout, session, route }) => {
           </div>
         </div>
       </div>
+
+      {showPerfil && (
+        <PerfilModal usuario={session?.user} onCerrar={() => setShowPerfil(false)} />
+      )}
 
       {showLogoutDialog && (
         <div className="logout-dialog" role="presentation">
