@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import App from '../src/App.jsx'
 import ActivatePage, { ActivationAccount } from '../src/features/auth/pages/ActivatePage.jsx'
 import DashboardPage from '../src/features/auth/pages/DashboardPage.jsx'
+import PerfilModal from '../src/features/auth/components/PerfilModal.jsx'
 import ReporteDetalleModal from '../src/features/reportes/components/ReporteDetalleModal.jsx'
 import AsignacionesPage from '../src/features/asignaciones/pages/AsignacionesPage.jsx'
 import BloquesList, { filtrarBloques } from '../src/features/espacios/components/BloquesList.jsx'
@@ -380,6 +381,60 @@ check('la elección manual de ícono se respeta en cabecera y lista', () => {
   // se queda en edificio porque no tiene elección manual.
   assert.equal((lista.match(/M12 3v18M3 12h18/g) ?? []).length, 1, 'el bloque 7 debe usar el balón')
   assert.equal((lista.match(/M5 9h14M5 13h14M5 17h14/g) ?? []).length, 1, 'el bloque 8 sigue en edificio')
+})
+
+check('el perfil muestra los datos de solo lectura', () => {
+  const html = renderToStaticMarkup(
+    <PerfilModal
+      usuario={{
+        nombre: 'Esteban Moreno',
+        correoInstitucional: 'esteban@correounivalle.edu.co',
+        cedulaOCodigo: '1234567890',
+        sedeNombre: 'Cali',
+        rol: 'ADMIN',
+      }}
+      onCerrar={() => {}}
+    />,
+  )
+  for (const text of [
+    'Mi perfil',
+    'Nombre',
+    'Correo electrónico',
+    'Identificación',
+    'Sede',
+    'Rol',
+    'Esteban Moreno',
+    'esteban@correounivalle.edu.co',
+    '1234567890',
+    'Cali',
+    'ADMIN',
+  ]) {
+    assert.ok(html.includes(text), `falta: ${text}`)
+  }
+  assert.ok(html.includes('role="dialog"'))
+  assert.ok(html.includes('aria-modal="true"'))
+  assert.ok(html.includes('aria-label="Cerrar"'))
+  assert.ok(!html.includes('<input'), 'el perfil no permite editar')
+})
+
+check('la identificación usa el código institucional y no inventa texto', () => {
+  const html = renderToStaticMarkup(
+    <PerfilModal
+      usuario={{
+        nombre: 'Ana',
+        correoInstitucional: 'ana@correounivalle.edu.co',
+        cedulaOCodigo: null,
+        codigoInstitucional: '2024001',
+        sedeNombre: 'Palmira',
+        rol: 'ADMINISTRADOR',
+      }}
+      onCerrar={() => {}}
+    />,
+  )
+  assert.ok(html.includes('2024001'))
+  assert.ok(html.includes('Palmira'))
+  assert.ok(!html.includes('No registrado'))
+  assert.ok(!html.includes('No asignada'))
 })
 
 clearSession()
