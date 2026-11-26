@@ -1,0 +1,71 @@
+.auditoria-page { display: flex; flex-direction: column; gap: 18px; }
+
+.auditoria-header { margin-bottom: 2px; }
+.auditoria-titulo { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 700; color: #1f2937; }
+.auditoria-sub { margin: 4px 0 0; font-size: 14px; color: #6b7280; }
+
+.auditoria-filtros { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; }
+.auditoria-filtros__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 16px; }
+.auditoria-filtro { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.auditoria-filtro > span { font-size: 12px; font-weight: 600; color: #4b5563; }
+.auditoria-filtro input,
+.auditoria-filtro select {
+  height: 38px; border: 1px solid #d7dbe0; border-radius: 9px;
+  padding: 0 11px; font-size: 13px; font-family: inherit; background: #fff; width: 100%;
+}
+.auditoria-filtro--ancho { grid-column: span 2; }
+.auditoria-filtros__acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
+.auditoria-btn {
+  height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 600; font-size: 13px;
+  border: 1px solid #d7dbe0; background: #fff; color: #374151; cursor: pointer;
+}
+.auditoria-btn:hover:not(:disabled) { background: #f8f9fb; }
+.auditoria-btn:disabled { opacity: 0.55; cursor: default; }
+.auditoria-btn--primary { background: var(--color-brand); border-color: var(--color-brand); color: #fff; }
+.auditoria-btn--primary:hover:not(:disabled) { background: var(--color-brand-strong); }
+
+.auditoria-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; }
+.auditoria-card__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #eef0f2; }
+.auditoria-count { font-weight: 700; color: #111827; }
+.auditoria-count span { color: #6b7280; font-weight: 500; }
+.auditoria-readonly { font-size: 12px; font-weight: 600; color: #6b7280; background: #f8f9fb; border: 1px solid #e5e7eb; padding: 5px 10px; border-radius: 999px; }
+
+.auditoria-state { padding: 22px 18px; color: #6b7280; }
+.auditoria-state--error { color: #b91c1c; }
+.auditoria-vacio { padding: 26px 18px; color: #6b7280; text-align: center; }
+
+.auditoria-scroll { overflow-x: auto; }
+.auditoria-tabla { width: 100%; border-collapse: collapse; min-width: 940px; }
+.auditoria-tabla th {
+  text-align: left; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: #6b7280; font-weight: 700; padding: 12px 14px; border-bottom: 1px solid #e5e7eb;
+  background: #fafbfc; white-space: nowrap;
+}
+.auditoria-tabla td { padding: 12px 14px; border-bottom: 1px solid #eef0f2; vertical-align: top; font-size: 13px; color: #374151; }
+.aud-id { font-weight: 700; color: #111827; }
+.aud-resp { font-weight: 600; color: #111827; }
+.aud-code { font-size: 12px; color: #6b7280; }
+.aud-when { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.aud-esp { font-weight: 600; color: #374151; }
+.aud-esp-sub { font-size: 12px; color: #6b7280; }
+.aud-desc { max-width: 220px; }
+
+.aud-chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+.aud-tipo { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: #f3f4f6; color: #4b5563; }
+
+.aud-badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.sit--proxima { background: #e3edff; color: #1d4ed8; }
+.sit--proceso { background: #d1fae5; color: #047857; }
+.sit--finalizada { background: #e8eaed; color: #374151; }
+.sit--cancelada { background: #fee2e2; color: #b91c1c; }
+.sit--liberada { background: #fef3c7; color: #b45309; }
+
+.auditoria-pager { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
+.auditoria-pager > span { font-size: 13px; color: #6b7280; }
+.auditoria-pager__btns { display: flex; gap: 8px; }
+
+@media (max-width: 1000px) {
+  .auditoria-filtros__grid { grid-template-columns: repeat(2, 1fr); }
+  .auditoria-filtro--ancho { grid-column: span 2; }
+}
