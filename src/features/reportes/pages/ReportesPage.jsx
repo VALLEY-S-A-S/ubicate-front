@@ -41,12 +41,12 @@ export default function ReportesPage({ token, sedeId, rol }) {
   const [detalleError, setDetalleError] = useState('')
   const [completando, setCompletando] = useState(false)
   const [completarError, setCompletarError] = useState('')
-  const [evidenciaUrl, setEvidenciaUrl] = useState(null)
+  const [evidencias, setEvidencias] = useState([])
   const [evidenciaCargando, setEvidenciaCargando] = useState(false)
   const [evidenciaError, setEvidenciaError] = useState('')
   const detalleAbortRef = useRef(null)
   const evidenciaAbortRef = useRef(null)
-  const urlEvidenciaRef = useRef(null)
+  const urlsEvidenciaRef = useRef([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -127,44 +127,54 @@ export default function ReportesPage({ token, sedeId, rol }) {
     return () => controller.abort()
   }, [aplicados, pagina, token, intento])
 
-  const liberarEvidencia = useCallback(() => {
-    if (urlEvidenciaRef.current) {
-      URL.revokeObjectURL(urlEvidenciaRef.current)
-      urlEvidenciaRef.current = null
-    }
-    setEvidenciaUrl(null)
+  const liberarEvidencias = useCallback(() => {
+    urlsEvidenciaRef.current.forEach((url) => URL.revokeObjectURL(url))
+    urlsEvidenciaRef.current = []
+    setEvidencias([])
   }, [])
 
   useEffect(() => () => {
     detalleAbortRef.current?.abort()
     evidenciaAbortRef.current?.abort()
-    if (urlEvidenciaRef.current) URL.revokeObjectURL(urlEvidenciaRef.current)
+    urlsEvidenciaRef.current.forEach((url) => URL.revokeObjectURL(url))
   }, [])
 
-  const cargarEvidencia = useCallback(async (id) => {
+  const cargarEvidencias = useCallback(async (id, lista = []) => {
     evidenciaAbortRef.current?.abort()
-    liberarEvidencia()
+    liberarEvidencias()
     const controller = new AbortController()
     evidenciaAbortRef.current = controller
     setEvidenciaCargando(true)
     setEvidenciaError('')
     try {
-      const blob = await obtenerEvidencia(id, token, controller.signal)
-      if (controller.signal.aborted) return
-      const url = URL.createObjectURL(blob)
-      urlEvidenciaRef.current = url
-      setEvidenciaUrl(url)
+      if (!lista.length) {
+        const blob = await obtenerEvidencia(id, token, controller.signal)
+        if (controller.signal.aborted) return
+        const url = URL.createObjectURL(blob)
+        urlsEvidenciaRef.current = [url]
+        setEvidencias([{ id: null, url }])
+        return
+      }
+      const cargadas = []
+      for (const evidencia of lista) {
+        const blob = await obtenerEvidencia(id, token, controller.signal, evidencia.id)
+        if (controller.signal.aborted) return
+        const url = URL.createObjectURL(blob)
+        urlsEvidenciaRef.current.push(url)
+        cargadas.push({ ...evidencia, url })
+      }
+      setEvidencias(cargadas)
     } catch (fallo) {
-      if (fallo.name !== 'AbortError') setEvidenciaError('No se pudo cargar la imagen de evidencia.')
+      if (fallo.name !== 'AbortError') setEvidenciaError('No se pudo cargar la evidencia.')
     } finally {
       if (!controller.signal.aborted) setEvidenciaCargando(false)
     }
-  }, [token, liberarEvidencia])
+  }, [token, liberarEvidencias])
 
   const abrirDetalle = useCallback(async (reporte) => {
     detalleAbortRef.current?.abort()
     evidenciaAbortRef.current?.abort()
-    liberarEvidencia()
+    liberarEvidencias()
     setDetalle(reporte)
     setDetalleCargando(true)
     setDetalleError('')
@@ -178,7 +188,7 @@ export default function ReportesPage({ token, sedeId, rol }) {
       if (controller.signal.aborted) return
       setDetalle(completo)
       if (completo?.tieneEvidencia) {
-        await cargarEvidencia(completo.id)
+        await cargarEvidencias(completo.id, completo.evidencias ?? [])
       } else {
         setEvidenciaCargando(false)
       }
@@ -190,20 +200,19 @@ export default function ReportesPage({ token, sedeId, rol }) {
     } finally {
       if (!controller.signal.aborted) setDetalleCargando(false)
     }
-  }, [token, cargarEvidencia, liberarEvidencia])
+  }, [token, cargarEvidencias, liberarEvidencias])
 
   const cerrarDetalle = useCallback(() => {
     detalleAbortRef.current?.abort()
     evidenciaAbortRef.current?.abort()
-    liberarEvidencia()
+    liberarEvidencias()
     setDetalle(null)
     setDetalleCargando(false)
     setDetalleError('')
     setCompletarError('')
     setEvidenciaCargando(false)
     setEvidenciaError('')
-  }, [liberarEvidencia])
-
+  }, [liberarEvidencias])
   const detalleId = detalle?.id
   const completarDetalle = useCallback(async () => {
     if (!detalleId || completando) return
@@ -341,7 +350,7 @@ export default function ReportesPage({ token, sedeId, rol }) {
           reporte={detalle}
           cargando={detalleCargando}
           error={detalleError}
-          evidenciaUrl={evidenciaUrl}
+          evidencias={evidencias}
           evidenciaCargando={evidenciaCargando}
           evidenciaError={evidenciaError}
           puedeCompletar={puedeCompletar}

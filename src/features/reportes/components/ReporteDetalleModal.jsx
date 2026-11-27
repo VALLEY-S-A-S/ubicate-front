@@ -14,7 +14,7 @@ export default function ReporteDetalleModal({
   reporte,
   cargando,
   error,
-  evidenciaUrl,
+  evidencias = [],
   evidenciaCargando,
   evidenciaError,
   puedeCompletar = false,
@@ -25,21 +25,35 @@ export default function ReporteDetalleModal({
   onReintentar,
 }) {
   const cerrarRef = useRef(null)
+  const visorCerrarRef = useRef(null)
   const [confirmando, setConfirmando] = useState(false)
+  const [indiceEvidencia, setIndiceEvidencia] = useState(0)
+  const [visorAbierto, setVisorAbierto] = useState(false)
 
   useEffect(() => {
     const anterior = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     cerrarRef.current?.focus()
     function alPresionar(event) {
-      if (event.key === 'Escape') onCerrar()
+      if (event.key === 'Escape') {
+        if (visorAbierto) setVisorAbierto(false)
+        else onCerrar()
+      }
     }
     document.addEventListener('keydown', alPresionar)
     return () => {
       document.removeEventListener('keydown', alPresionar)
       document.body.style.overflow = anterior
     }
-  }, [onCerrar])
+  }, [onCerrar, visorAbierto])
+
+  useEffect(() => {
+    setIndiceEvidencia(0)
+  }, [evidencias])
+
+  useEffect(() => {
+    if (visorAbierto) visorCerrarRef.current?.focus()
+  }, [visorAbierto])
 
   if (!reporte) return null
 
@@ -61,7 +75,9 @@ export default function ReporteDetalleModal({
       <div className="reportes-modal__panel">
         <header className="reportes-modal__cabecera">
           <div className="reportes-modal__marca">
-            <span className="reportes-modal__escudo">U</span>
+            <span className="reportes-modal__escudo">
+              <ReporteIcon nombre="alerta" size={21} />
+            </span>
             <div>
               <strong>Ubícate Univalle</strong>
               <span>Detalle del reporte</span>
@@ -161,8 +177,37 @@ export default function ReporteDetalleModal({
                   </span>
                   {reporte.tieneEvidencia ? (
                     <div className="reportes-evidencia">
-                      {evidenciaUrl ? (
-                        <img src={evidenciaUrl} alt="Evidencia fotográfica del reporte" />
+                      {evidencias.length ? (
+                        <>
+                          <button
+                            type="button"
+                            className="reportes-evidencia__principal"
+                            onClick={() => setVisorAbierto(true)}
+                            aria-label="Ampliar evidencia"
+                          >
+                            <img
+                              src={evidencias[Math.min(indiceEvidencia, evidencias.length - 1)].url}
+                              alt="Evidencia fotográfica del reporte"
+                            />
+                          </button>
+                          {evidencias.length > 1 && (
+                            <div className="reportes-evidencia__miniaturas">
+                              {evidencias.map((evidencia, indice) => (
+                                <button
+                                  key={evidencia.id ?? evidencia.url}
+                                  type="button"
+                                  className={`reportes-evidencia__miniatura${
+                                    indice === indiceEvidencia ? ' reportes-evidencia__miniatura--activa' : ''
+                                  }`}
+                                  onClick={() => setIndiceEvidencia(indice)}
+                                  aria-label={`Ver evidencia ${indice + 1}`}
+                                >
+                                  <img src={evidencia.url} alt="" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       ) : evidenciaError ? (
                         <p className="reportes-evidencia__error">{evidenciaError}</p>
                       ) : (
@@ -260,6 +305,58 @@ export default function ReporteDetalleModal({
             </>
           )}
         </footer>
+
+        {visorAbierto && evidencias.length > 0 && (
+          <div
+            className="reportes-visor"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Visor de evidencia"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setVisorAbierto(false)
+            }}
+          >
+            <button
+              ref={visorCerrarRef}
+              type="button"
+              className="reportes-visor__cerrar"
+              onClick={() => setVisorAbierto(false)}
+              aria-label="Cerrar visor"
+            >
+              <ReporteIcon nombre="cerrar" size={22} />
+            </button>
+            {evidencias.length > 1 && (
+              <button
+                type="button"
+                className="reportes-visor__nav reportes-visor__nav--anterior"
+                onClick={() => setIndiceEvidencia((indice) => (indice - 1 + evidencias.length) % evidencias.length)}
+                aria-label="Evidencia anterior"
+              >
+                <ReporteIcon nombre="chevronIzquierda" size={28} />
+              </button>
+            )}
+            <img
+              className="reportes-visor__imagen"
+              src={evidencias[Math.min(indiceEvidencia, evidencias.length - 1)].url}
+              alt="Evidencia ampliada del reporte"
+            />
+            {evidencias.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="reportes-visor__nav reportes-visor__nav--siguiente"
+                  onClick={() => setIndiceEvidencia((indice) => (indice + 1) % evidencias.length)}
+                  aria-label="Evidencia siguiente"
+                >
+                  <ReporteIcon nombre="chevronDerecha" size={28} />
+                </button>
+                <span className="reportes-visor__contador">
+                  {Math.min(indiceEvidencia, evidencias.length - 1) + 1} / {evidencias.length}
+                </span>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

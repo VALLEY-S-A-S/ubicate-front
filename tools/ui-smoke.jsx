@@ -98,7 +98,7 @@ const reportePendiente = {
 const propsDetalle = {
   cargando: false,
   error: '',
-  evidenciaUrl: null,
+  evidencias: [],
   evidenciaCargando: false,
   evidenciaError: '',
   puedeCompletar: true,
@@ -117,6 +117,17 @@ check('un reporte completado ya no ofrece la acción de completar', () => {
     <ReporteDetalleModal {...propsDetalle} reporte={{ ...reportePendiente, id: 10, estado: 'COMPLETADO' }} />,
   )
   assert.ok(!html.includes('Completar reporte'))
+})
+check('el detalle usa el icono de advertencia y permite ampliar la evidencia', () => {
+  const html = renderToStaticMarkup(
+    <ReporteDetalleModal
+      {...propsDetalle}
+      reporte={{ ...reportePendiente, tieneEvidencia: true }}
+      evidencias={[{ id: 1, url: 'blob:evidencia' }]}
+    />,
+  )
+  assert.ok(!html.includes('>U<'))
+  assert.ok(html.includes('aria-label="Ampliar evidencia"'))
 })
 
 const sesionAdmin = { token: 'jwt', user: { nombre: 'Admin', sedeId: 2 } }
