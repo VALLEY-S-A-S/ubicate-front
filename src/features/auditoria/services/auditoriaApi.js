@@ -1,6 +1,6 @@
-import { apiRequest } from '../../../shared/api/client'
+import { apiRequest } from '../../../shared/api/client.js'
 
-export function listarAuditoriaReservas(filtros = {}, token) {
+function buildQuery(filtros = {}, paginar = true) {
   const {
     desde, hasta, bloqueId, pisoId, tipoEspacioId,
     rol, tipoEvento, situacion, q, page = 0, size = 10,
@@ -15,7 +15,17 @@ export function listarAuditoriaReservas(filtros = {}, token) {
   if (tipoEvento) p.set('tipoEvento', tipoEvento)
   if (situacion) p.set('situacion', situacion)
   if (q) p.set('q', q)
-  p.set('page', String(page))
-  p.set('size', String(size))
-  return apiRequest(`/api/auditoria/reservas?${p.toString()}`, { token })
+  if (paginar) {
+    p.set('page', String(page))
+    p.set('size', String(size))
+  }
+  return p.toString()
+}
+
+export function listarAuditoriaReservas(filtros = {}, token) {
+  return apiRequest(`/api/auditoria/reservas?${buildQuery(filtros)}`, { token })
+}
+
+export function exportarAuditoriaReservas(filtros = {}, token) {
+  return apiRequest(`/api/auditoria/reservas/export?${buildQuery(filtros, false)}`, { token, responseType: 'blob' })
 }

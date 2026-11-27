@@ -29,6 +29,8 @@
 .auditoria-card__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #eef0f2; }
 .auditoria-count { font-weight: 700; color: #111827; }
 .auditoria-count span { color: #6b7280; font-weight: 500; }
+.auditoria-card__head-actions { display: flex; align-items: center; gap: 10px; }
+.auditoria-btn--export { height: 32px; padding: 0 12px; font-size: 12px; }
 .auditoria-readonly { font-size: 12px; font-weight: 600; color: #6b7280; background: #f8f9fb; border: 1px solid #e5e7eb; padding: 5px 10px; border-radius: 999px; }
 
 .auditoria-state { padding: 22px 18px; color: #6b7280; }
