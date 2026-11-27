@@ -37,8 +37,11 @@ export function completarReporte(id, token, signal) {
   return apiRequest(`/api/reportes/${id}/completar`, { method: 'PATCH', token, signal })
 }
 
-export function obtenerEvidencia(id, token, signal) {
-  return apiRequest(`/api/reportes/${id}/evidencia`, { token, signal, responseType: 'blob' })
+export function obtenerEvidencia(id, token, signal, evidenciaId) {
+  const ruta = evidenciaId
+    ? `/api/reportes/${id}/evidencias/${evidenciaId}`
+    : `/api/reportes/${id}/evidencia`
+  return apiRequest(ruta, { token, signal, responseType: 'blob' })
 }
 
 export function listarTiposAnomalia(token, signal) {
