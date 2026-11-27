@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import '../styles/auditoria.css'
-import { listarAuditoriaReservas } from '../services/auditoriaApi'
+import { listarAuditoriaReservas, exportarAuditoriaReservas } from '../services/auditoriaApi'
 import { listarBloques } from '../../espacios/services/bloquesApi'
 import { listarTiposEspacio, listarPisos } from '../../espacios/services/espaciosApi'
 
@@ -43,6 +43,8 @@ export default function AuditoriaPage({ token }) {
   const [data, setData] = useState({ content: [], totalElements: 0, totalPages: 1 })
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
+  const [errorExport, setErrorExport] = useState('')
+  const [exportando, setExportando] = useState(false)
   const [bloques, setBloques] = useState([])
   const [tipos, setTipos] = useState([])
   const [pisos, setPisos] = useState([])
@@ -84,6 +86,31 @@ export default function AuditoriaPage({ token }) {
   function cambiar(patch) { setFiltros((f) => ({ ...f, ...patch })) }
   function aplicar() { setPage(0); setAplicados(filtros) }
   function limpiar() { setFiltros(VACIO); setPage(0); setAplicados(VACIO) }
+
+  async function exportar() {
+    setExportando(true)
+    setErrorExport('')
+    try {
+      const blob = await exportarAuditoriaReservas(aplicados, token)
+      const url = URL.createObjectURL(blob)
+      const pad = (n) => String(n).padStart(2, '0')
+      const ahora = new Date()
+      const stamp = `${ahora.getFullYear()}${pad(ahora.getMonth() + 1)}${pad(ahora.getDate())}-${pad(ahora.getHours())}${pad(ahora.getMinutes())}`
+      const enlace = document.createElement('a')
+      enlace.href = url
+      enlace.download = `auditoria-reservas-${stamp}.xlsx`
+      document.body.appendChild(enlace)
+      enlace.click()
+      enlace.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      if (err.status !== 401) {
+        setErrorExport(err?.message ?? 'No se pudo exportar la auditoría.')
+      }
+    } finally {
+      setExportando(false)
+    }
+  }
 
   const rows = data.content ?? []
   const totalPaginas = Math.max(1, data.totalPages ?? 1)
@@ -162,11 +189,17 @@ export default function AuditoriaPage({ token }) {
       <div className="auditoria-card">
         <div className="auditoria-card__head">
           <span className="auditoria-count">{data.totalElements ?? 0} <span>eventos</span></span>
-          <span className="auditoria-readonly">Solo lectura</span>
+          <div className="auditoria-card__head-actions">
+            <button type="button" className="auditoria-btn auditoria-btn--export" onClick={exportar} disabled={exportando}>
+              {exportando ? 'Exportando…' : 'Exportar a Excel'}
+            </button>
+            <span className="auditoria-readonly">Solo lectura</span>
+          </div>
         </div>
 
         {status === 'loading' && <p className="auditoria-state">Cargando…</p>}
         {status === 'error' && <p className="auditoria-state auditoria-state--error" role="alert">{error}</p>}
+        {errorExport && <p className="auditoria-state auditoria-state--error" role="alert">{errorExport}</p>}
         {status === 'ready' && (rows.length === 0 ? (
           <p className="auditoria-vacio">No hay eventos para los filtros seleccionados.</p>
         ) : (
